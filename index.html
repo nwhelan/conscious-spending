@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conscious Spending Planner</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">💰 Conscious Spending Planner</h1>
+            <div class="header-controls">
+                <select id="scenarioSelector" class="scenario-selector">
+                    <option value="baseline">Baseline 2025</option>
+                    <option value="optimistic">Optimistic</option>
+                    <option value="conservative">Conservative</option>
+                </select>
+                <div class="view-toggle">
+                    <button id="person1View" class="view-btn active" data-view="person1">Partner 1</button>
+                    <button id="combinedView" class="view-btn" data-view="combined">Combined</button>
+                    <button id="person2View" class="view-btn" data-view="person2">Partner 2</button>
+                </div>
+                <button id="settingsBtn" class="settings-btn">⚙️</button>
+            </div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <button class="nav-tab active" data-tab="dashboard">📊 Dashboard</button>
+        <button class="nav-tab" data-tab="income">💰 Income</button>
+        <button class="nav-tab" data-tab="expenses">📝 Expenses</button>
+        <button class="nav-tab" data-tab="projections">📈 Projections</button>
+        <button class="nav-tab" data-tab="scenarios">⚙️ Scenarios</button>
+    </nav>
+
+    <main class="main-content">
+        <!-- Dashboard Tab -->
+        <section id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="card summary-card">
+                    <h2>Financial Summary</h2>
+                    <div class="summary-stats">
+                        <div class="stat">
+                            <span class="stat-label">Monthly Net Income</span>
+                            <span class="stat-value" id="monthlyNetIncome">$0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Monthly Expenses</span>
+                            <span class="stat-value" id="monthlyExpenses">$0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Monthly Surplus</span>
+                            <span class="stat-value" id="monthlySurplus">$0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Annual Savings Rate</span>
+                            <span class="stat-value" id="savingsRate">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card income-card">
+                    <h3>Take-Home Pay Breakdown</h3>
+                    <div class="income-breakdown">
+                        <canvas id="incomeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card expenses-card">
+                    <h3>Expense Categories</h3>
+                    <div class="expense-breakdown">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card cashflow-card">
+                    <h3>12-Month Cash Flow</h3>
+                    <div class="cashflow-chart">
+                        <canvas id="cashflowChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card ramit-card">
+                    <h3>Conscious Spending Plan</h3>
+                    <div class="ramit-breakdown">
+                        <div class="category-bar">
+                            <span class="category-label">Fixed Costs (50-60%)</span>
+                            <div class="bar-container">
+                                <div class="bar target-bar" style="width: 60%"></div>
+                                <div class="bar actual-bar fixed-costs" id="fixedCostsBar"></div>
+                            </div>
+                            <span class="category-value" id="fixedCostsValue">0%</span>
+                        </div>
+                        <div class="category-bar">
+                            <span class="category-label">Investments (10%)</span>
+                            <div class="bar-container">
+                                <div class="bar target-bar" style="width: 10%"></div>
+                                <div class="bar actual-bar investments" id="investmentsBar"></div>
+                            </div>
+                            <span class="category-value" id="investmentsValue">0%</span>
+                        </div>
+                        <div class="category-bar">
+                            <span class="category-label">Savings (5-10%)</span>
+                            <div class="bar-container">
+                                <div class="bar target-bar" style="width: 10%"></div>
+                                <div class="bar actual-bar savings" id="savingsBar"></div>
+                            </div>
+                            <span class="category-value" id="savingsValue">0%</span>
+                        </div>
+                        <div class="category-bar">
+                            <span class="category-label">Guilt-Free (20-35%)</span>
+                            <div class="bar-container">
+                                <div class="bar target-bar" style="width: 25%"></div>
+                                <div class="bar actual-bar guilt-free" id="guiltFreeBar"></div>
+                            </div>
+                            <span class="category-value" id="guiltFreeValue">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card goals-card">
+                    <h3>Financial Goals</h3>
+                    <div class="goals-list">
+                        <div class="goal-item">
+                            <span class="goal-name">Emergency Fund</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 75%"></div>
+                            </div>
+                            <span class="goal-value">$15,000 / $20,000</span>
+                        </div>
+                        <div class="goal-item">
+                            <span class="goal-name">House Down Payment</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 35%"></div>
+                            </div>
+                            <span class="goal-value">$35,000 / $100,000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Income Tab -->
+        <section id="income" class="tab-content">
+            <div class="income-grid">
+                <div class="card">
+                    <h2>Income Planning</h2>
+                    <div class="income-form">
+                        <div class="person-section" id="person1Income">
+                            <h3>Partner 1</h3>
+                            <div class="form-group">
+                                <label for="person1Salary">Annual Salary</label>
+                                <input type="number" id="person1Salary" value="120000">
+                            </div>
+                            <div class="form-group">
+                                <label for="person1Bonus">Annual Bonus</label>
+                                <input type="number" id="person1Bonus" value="15000">
+                            </div>
+                            <div class="form-group">
+                                <label for="person1Other">Other Income</label>
+                                <input type="number" id="person1Other" value="2000">
+                            </div>
+                            <h4>Pre-Tax Deductions</h4>
+                            <div class="form-group">
+                                <label for="person1_401k">401(k) Contribution</label>
+                                <input type="number" id="person1_401k" value="18000">
+                            </div>
+                            <div class="form-group">
+                                <label for="person1Health">Health Insurance</label>
+                                <input type="number" id="person1Health" value="3600">
+                            </div>
+                            <div class="form-group">
+                                <label for="person1HSA">HSA Contribution</label>
+                                <input type="number" id="person1HSA" value="4300">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Expenses Tab -->
+        <section id="expenses" class="tab-content">
+            <div class="expenses-grid">
+                <div class="card">
+                    <h2>Expense Tracking</h2>
+                    <p>Expense management interface coming soon...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projections Tab -->
+        <section id="projections" class="tab-content">
+            <div class="projections-grid">
+                <div class="card">
+                    <h2>Financial Projections</h2>
+                    <p>Projection modeling coming soon...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scenarios Tab -->
+        <section id="scenarios" class="tab-content">
+            <div class="scenarios-grid">
+                <div class="card">
+                    <h2>Scenario Management</h2>
+                    <div class="scenario-controls">
+                        <button class="btn-primary">Create New Scenario</button>
+                        <button class="btn-secondary">Import Scenario</button>
+                        <button class="btn-secondary">Export Current</button>
+                    </div>
+                    <div class="scenario-list">
+                        <div class="scenario-item">
+                            <h4>Baseline 2025</h4>
+                            <p>Current income and spending patterns</p>
+                            <div class="scenario-actions">
+                                <button class="btn-small">Edit</button>
+                                <button class="btn-small">Duplicate</button>
+                                <button class="btn-small">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/utils/storage.js"></script>
+    <script src="js/utils/tax-calculator.js"></script>
+    <script src="js/core/calculator.js"></script>
+    <script src="js/core/scenario-manager.js"></script>
+    <script src="js/components/visualization.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

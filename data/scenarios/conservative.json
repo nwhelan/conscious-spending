@@ -1,0 +1,89 @@
+{
+  "metadata": {
+    "name": "Conservative",
+    "description": "Reduced income with tighter spending",
+    "created": "2025-01-15T00:00:00.000Z",
+    "lastModified": "2025-01-15T00:00:00.000Z"
+  },
+  "household": {
+    "location": {
+      "state": "CA",
+      "locality": "San Francisco"
+    },
+    "filingStatus": "marriedFilingJointly",
+    "members": ["person1", "person2"]
+  },
+  "income": {
+    "person1": {
+      "name": "Partner 1",
+      "salary": 102000,
+      "bonus": 8000,
+      "otherIncome": 1000,
+      "payFrequency": "biweekly",
+      "preTexDeductions": {
+        "retirement401k": 15000,
+        "healthInsurance": 3600,
+        "hsa": 2000
+      }
+    },
+    "person2": {
+      "name": "Partner 2",
+      "salary": 72000,
+      "bonus": 2000,
+      "otherIncome": 0,
+      "payFrequency": "monthly",
+      "preTexDeductions": {
+        "retirement401k": 8000,
+        "healthInsurance": 0,
+        "hsa": 0
+      }
+    }
+  },
+  "expenses": {
+    "ramitCategories": {
+      "fixedCosts": {
+        "housing": {
+          "rent": { "amount": 3000, "assignedTo": "shared" },
+          "utilities": { "amount": 180, "assignedTo": "shared" },
+          "rentersInsurance": { "amount": 20, "assignedTo": "shared" }
+        },
+        "transportation": {
+          "carPayment1": { "amount": 400, "assignedTo": "person1" },
+          "carPayment2": { "amount": 0, "assignedTo": "person2" },
+          "carInsurance": { "amount": 150, "assignedTo": "shared" },
+          "gasAndMaintenance": { "amount": 300, "assignedTo": "shared" },
+          "publicTransport": { "amount": 120, "assignedTo": "person2" }
+        },
+        "essentials": {
+          "groceries": { "amount": 700, "assignedTo": "shared" },
+          "cellPhone": { "amount": 100, "assignedTo": "shared" },
+          "internet": { "amount": 60, "assignedTo": "shared" }
+        },
+        "debt": {
+          "studentLoan1": { "amount": 300, "assignedTo": "person1" },
+          "studentLoan2": { "amount": 150, "assignedTo": "person2" }
+        }
+      },
+      "investments": {
+        "retirement": { "amount": 800, "assignedTo": "shared" },
+        "brokerage": { "amount": 300, "assignedTo": "shared" },
+        "rothIRA": { "amount": 200, "assignedTo": "shared" }
+      },
+      "savings": {
+        "emergency": { "amount": 600, "assignedTo": "shared" },
+        "vacation": { "amount": 200, "assignedTo": "shared" },
+        "houseDownPayment": { "amount": 500, "assignedTo": "shared" },
+        "carReplacement": { "amount": 100, "assignedTo": "shared" }
+      },
+      "guiltFreeSpending": {
+        "dining": { "amount": 500, "assignedTo": "shared" },
+        "entertainment": { "amount": 200, "assignedTo": "shared" },
+        "hobbies": { "amount": 100, "assignedTo": "person1" },
+        "personalShopping": { "amount": 100, "assignedTo": "person2" },
+        "subscriptions": { "amount": 100, "assignedTo": "shared" },
+        "gifts": { "amount": 75, "assignedTo": "shared" },
+        "miscellaneous": { "amount": 150, "assignedTo": "shared" }
+      }
+    }
+  }
+}

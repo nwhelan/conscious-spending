@@ -1,0 +1,47 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Validate HTML
+      run: |
+        # Simple HTML validation - check if files are well-formed
+        if command -v tidy >/dev/null 2>&1; then
+          tidy -q -e index.html
+        else
+          echo "HTML validation skipped (tidy not available)"
+        fi
+        
+    - name: Check JavaScript syntax
+      run: |
+        # Basic JavaScript syntax check
+        find js -name "*.js" -exec node -c {} \;
+        
+    - name: Validate JSON files
+      run: |
+        # Validate JSON configuration files
+        find data -name "*.json" -exec python3 -m json.tool {} \; > /dev/null
+        
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
+        exclude_assets: '.github,README.md,.gitignore'
