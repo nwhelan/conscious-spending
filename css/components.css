@@ -397,6 +397,325 @@
     }
 }
 
+/* Projections */
+.projections-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+}
+
+@media (max-width: 1200px) {
+    .projections-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.projection-card,
+.scenario-comparison-card {
+    grid-column: 1 / -1;
+}
+
+.projection-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.projection-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-md);
+    background: var(--neutral-100);
+    border-radius: var(--radius-md);
+}
+
+.projection-item .label {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-700);
+    margin-bottom: var(--space-xs);
+    text-align: center;
+}
+
+.projection-item .value {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--neutral-900);
+}
+
+.projection-chart {
+    height: 300px;
+    position: relative;
+}
+
+/* Goals */
+.goal-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-md);
+    background: var(--neutral-100);
+}
+
+.goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.goal-name {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--neutral-800);
+}
+
+.goal-edit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    padding: var(--space-xs);
+    border-radius: var(--radius-sm);
+    transition: background 0.2s;
+}
+
+.goal-edit-btn:hover {
+    background: var(--neutral-200);
+}
+
+.goal-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--neutral-700);
+}
+
+.goal-amounts {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.goal-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    margin-top: var(--space-lg);
+}
+
+/* What-If Analysis */
+.whatif-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.whatif-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.whatif-item label {
+    flex: 0 0 150px;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.whatif-item input[type="range"] {
+    flex: 1;
+    margin: 0 var(--space-md);
+}
+
+.whatif-item span {
+    flex: 0 0 50px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+
+.whatif-item input[type="number"] {
+    flex: 1;
+    padding: var(--space-sm);
+    border: 1px solid var(--neutral-300);
+    border-radius: var(--radius-md);
+}
+
+.whatif-results h3 {
+    margin-bottom: var(--space-md);
+    color: var(--neutral-800);
+}
+
+.whatif-comparison {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+.whatif-before,
+.whatif-after {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    background: var(--neutral-100);
+    flex: 1;
+}
+
+.whatif-arrow {
+    font-size: var(--font-size-xl);
+    color: var(--primary-blue);
+    font-weight: bold;
+}
+
+.whatif-difference {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--primary-blue);
+    color: var(--white);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+}
+
+/* Scenario Comparison */
+.scenario-selector-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.comparison-chart {
+    height: 300px;
+    position: relative;
+    margin-bottom: var(--space-lg);
+}
+
+.comparison-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+}
+
+.comparison-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md);
+    background: var(--neutral-100);
+    border-radius: var(--radius-md);
+}
+
+.metric-name {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-700);
+}
+
+.metric-value {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--primary-green);
+}
+
+/* Retirement Calculator */
+.retirement-inputs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.retirement-input {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.retirement-input label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--neutral-700);
+}
+
+.retirement-input input {
+    padding: var(--space-sm);
+    border: 1px solid var(--neutral-300);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+}
+
+.retirement-results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.retirement-projection,
+.retirement-monthly,
+.retirement-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-lg);
+    background: var(--neutral-100);
+    border-radius: var(--radius-md);
+}
+
+.retirement-results .value.large {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+.retirement-results .value.success {
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .projection-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .whatif-comparison {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+    
+    .whatif-arrow {
+        transform: rotate(90deg);
+    }
+    
+    .scenario-selector-grid,
+    .comparison-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .retirement-inputs {
+        grid-template-columns: 1fr;
+    }
+    
+    .whatif-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-sm);
+    }
+    
+    .whatif-item label {
+        flex: none;
+    }
+}
+
 /* Loading states */
 .loading {
     display: flex;

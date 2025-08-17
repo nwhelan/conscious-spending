@@ -33,6 +33,7 @@ class VisualizationManager {
         this.createIncomeChart();
         this.createExpenseChart();
         this.createCashflowChart();
+        this.createProjectionChart();
         this.updateRamitBreakdown();
     }
 
@@ -46,6 +47,7 @@ class VisualizationManager {
         this.updateIncomeChart();
         this.updateExpenseChart();
         this.updateCashflowChart();
+        this.updateProjectionChart();
         this.updateRamitBreakdown();
         this.updateSummaryStats();
     }
@@ -446,6 +448,110 @@ class VisualizationManager {
                 }
             }
         });
+    }
+
+    /**
+     * Create projection chart for 12-month financial projection
+     */
+    createProjectionChart() {
+        const ctx = document.getElementById('projectionChart');
+        if (!ctx) return;
+
+        this.charts.projection = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [
+                    {
+                        label: 'Net Income',
+                        data: new Array(12).fill(0),
+                        backgroundColor: this.colors.green + '20',
+                        borderColor: this.colors.green,
+                        borderWidth: 2,
+                        fill: false
+                    },
+                    {
+                        label: 'Total Expenses',
+                        data: new Array(12).fill(0),
+                        backgroundColor: this.colors.red + '20',
+                        borderColor: this.colors.red,
+                        borderWidth: 2,
+                        fill: false
+                    },
+                    {
+                        label: 'Surplus/Deficit',
+                        data: new Array(12).fill(0),
+                        backgroundColor: this.colors.primary + '20',
+                        borderColor: this.colors.primary,
+                        borderWidth: 2,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: (context) => {
+                                return `${context.dataset.label}: ${this.formatCurrency(context.parsed.y)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Amount ($)'
+                        },
+                        ticks: {
+                            callback: (value) => this.formatCurrency(value, 0)
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+
+    /**
+     * Update projection chart with current data
+     */
+    updateProjectionChart() {
+        if (!this.charts.projection || !this.currentData) return;
+
+        const monthlyNet = this.currentData.household.monthlyNetIncome;
+        const monthlyExpenses = this.currentData.expenses.total;
+        const monthlySurplus = monthlyNet - monthlyExpenses;
+
+        // Create 12 months of projected data
+        const netIncomeData = new Array(12).fill(monthlyNet);
+        const expenseData = new Array(12).fill(monthlyExpenses);
+        const surplusData = new Array(12).fill(monthlySurplus);
+
+        this.charts.projection.data.datasets[0].data = netIncomeData;
+        this.charts.projection.data.datasets[1].data = expenseData;
+        this.charts.projection.data.datasets[2].data = surplusData;
+
+        this.charts.projection.update();
     }
 
     /**

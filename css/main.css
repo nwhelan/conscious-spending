@@ -11,6 +11,7 @@
     --primary-red: #ef4444;
     --primary-blue: #3b82f6;
     --primary-purple: #8b5cf6;
+    --primary-yellow: #f59e0b;
     --neutral-100: #f5f5f5;
     --neutral-200: #e5e5e5;
     --neutral-300: #d4d4d4;
@@ -246,6 +247,19 @@ body {
     font-size: var(--font-size-2xl);
     font-weight: 700;
     color: var(--neutral-900);
+    transition: color 0.3s ease;
+}
+
+.stat-value.positive {
+    color: var(--primary-green);
+}
+
+.stat-value.negative {
+    color: var(--primary-red);
+}
+
+.stat-value.neutral {
+    color: var(--primary-blue);
 }
 
 /* Ramit Breakdown */
@@ -375,6 +389,23 @@ body {
     outline: none;
     border-color: var(--primary-blue);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input.error {
+    border-color: var(--primary-red);
+    background-color: #fef2f2;
+}
+
+.form-group input.error:focus {
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.error-message {
+    font-size: var(--font-size-xs);
+    color: var(--primary-red);
+    margin-top: var(--space-xs);
+    display: block;
 }
 
 /* Buttons */

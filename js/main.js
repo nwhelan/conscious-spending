@@ -92,6 +92,9 @@ class ConsciousSpendingApp {
         // Scenario management buttons
         this.setupScenarioManagementListeners();
         
+        // Projections functionality
+        this.setupProjectionsListeners();
+        
         // Window resize handler
         window.addEventListener('resize', () => this.handleResize());
         
@@ -119,7 +122,10 @@ class ConsciousSpendingApp {
             if (input) {
                 input.addEventListener('input', () => this.handleIncomeChange());
                 input.addEventListener('change', () => this.handleIncomeChange());
-                input.addEventListener('blur', () => this.saveCurrentScenario());
+                input.addEventListener('blur', () => {
+                    this.validateInput(input);
+                    this.saveCurrentScenario();
+                });
             }
         });
 
@@ -166,7 +172,10 @@ class ConsciousSpendingApp {
             if (input) {
                 input.addEventListener('input', () => this.handleExpenseChange());
                 input.addEventListener('change', () => this.handleExpenseChange());
-                input.addEventListener('blur', () => this.saveCurrentScenario());
+                input.addEventListener('blur', () => {
+                    this.validateInput(input);
+                    this.saveCurrentScenario();
+                });
             }
         });
 
@@ -181,6 +190,47 @@ class ConsciousSpendingApp {
         if (optimizeBtn) {
             optimizeBtn.addEventListener('click', () => this.optimizeExpensesForRamit());
         }
+    }
+
+    /**
+     * Set up projections functionality listeners
+     */
+    setupProjectionsListeners() {
+        // What-if analysis sliders
+        const whatIfSliders = [
+            'salaryIncrease', 'bonusChange', 'expenseReduction', 'investmentIncrease'
+        ];
+        
+        whatIfSliders.forEach(sliderId => {
+            const slider = document.getElementById(sliderId);
+            const display = document.getElementById(sliderId + 'Value');
+            
+            if (slider && display) {
+                slider.addEventListener('input', (e) => {
+                    display.textContent = e.target.value + '%';
+                    this.updateWhatIfAnalysis();
+                });
+            }
+        });
+
+        // Goal management
+        const addGoalBtn = document.getElementById('addGoalBtn');
+        if (addGoalBtn) {
+            addGoalBtn.addEventListener('click', () => this.addFinancialGoal());
+        }
+
+        // Retirement calculator inputs
+        const retirementInputs = [
+            'currentAge', 'retirementAge', 'currentSavings', 'monthlyContribution',
+            'employerMatch', 'annualReturn', 'retirementGoal'
+        ];
+        
+        retirementInputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('input', () => this.updateRetirementCalculation());
+            }
+        });
     }
 
     /**
@@ -434,12 +484,144 @@ class ConsciousSpendingApp {
             // Calculate scenario
             const calculations = this.calculator.setScenario(currentScenario);
             
+            // Update all UI components
+            this.updateIncomeDisplays(calculations);
+            this.updateExpenseSummaries();
+            this.updateDashboardStats(calculations);
+            this.updateRamitBreakdownDisplay(calculations);
+            this.updateProjectionSummary();
+            
             // Update visualizations
             this.visualization.updateCharts(calculations, this.currentView);
             
         } catch (error) {
             console.error('Error updating calculations:', error);
             this.showError('Error calculating financial data. Please check your inputs.');
+        }
+    }
+
+    /**
+     * Update income displays with calculated values
+     */
+    updateIncomeDisplays(calculations) {
+        if (!calculations) return;
+
+        // Update person 1 displays
+        if (calculations.person1) {
+            this.updateElement('person1GrossIncome', this.formatCurrency(calculations.person1.gross));
+            this.updateElement('person1NetIncome', this.formatCurrency(calculations.person1.netAnnual));
+        }
+
+        // Update person 2 displays
+        if (calculations.person2) {
+            this.updateElement('person2GrossIncome', this.formatCurrency(calculations.person2.gross));
+            this.updateElement('person2NetIncome', this.formatCurrency(calculations.person2.netAnnual));
+        }
+
+        // Update household summary
+        if (calculations.household) {
+            this.updateElement('totalGrossIncome', this.formatCurrency(calculations.household.grossIncome));
+            this.updateElement('totalPreTaxDeductions', this.formatCurrency(
+                (calculations.person1.preTexDeductions || 0) + (calculations.person2.preTexDeductions || 0)
+            ));
+            this.updateElement('totalFederalTax', this.formatCurrency(
+                (calculations.person1.federalTax || 0) + (calculations.person2.federalTax || 0)
+            ));
+            this.updateElement('totalStateTax', this.formatCurrency(
+                (calculations.person1.stateTax || 0) + (calculations.person2.stateTax || 0)
+            ));
+            this.updateElement('totalFICA', this.formatCurrency(
+                (calculations.person1.fica?.total || 0) + (calculations.person2.fica?.total || 0)
+            ));
+            this.updateElement('totalNetIncome', this.formatCurrency(calculations.household.netIncome));
+            this.updateElement('effectiveTaxRate', calculations.household.effectiveRate.toFixed(1) + '%');
+        }
+    }
+
+    /**
+     * Update dashboard statistics
+     */
+    updateDashboardStats(calculations) {
+        if (!calculations || !calculations.summary) return;
+
+        const summary = calculations.summary;
+        
+        this.updateElement('monthlyNetIncome', this.formatCurrency(summary.monthlyNetIncome));
+        this.updateElement('monthlyExpenses', this.formatCurrency(summary.monthlyExpenses));
+        this.updateElement('monthlySurplus', this.formatCurrency(summary.monthlySurplus));
+        this.updateElement('savingsRate', summary.savingsRate.toFixed(1) + '%');
+
+        // Update color coding based on values
+        this.updateStatElementColor('monthlySurplus', summary.monthlySurplus);
+        this.updateStatElementColor('savingsRate', summary.savingsRate, true);
+    }
+
+    /**
+     * Update Ramit breakdown display
+     */
+    updateRamitBreakdownDisplay(calculations) {
+        if (!calculations || !calculations.ramitBreakdown) return;
+
+        const ramit = calculations.ramitBreakdown;
+        
+        // Update the dashboard Ramit bars
+        this.updateCategoryBar('fixedCosts', ramit.fixedCosts);
+        this.updateCategoryBar('investments', ramit.investments);
+        this.updateCategoryBar('savings', ramit.savings);
+        this.updateCategoryBar('guiltFreeSpending', ramit.guiltFreeSpending);
+    }
+
+    /**
+     * Update category bar (from visualization component)
+     */
+    updateCategoryBar(categoryName, categoryData) {
+        const bar = document.getElementById(`${categoryName}Bar`);
+        const value = document.getElementById(`${categoryName}Value`);
+        
+        if (bar && value && categoryData) {
+            const percentage = Math.min(categoryData.percentage || 0, 100);
+            bar.style.width = `${percentage}%`;
+            value.textContent = `${percentage.toFixed(1)}%`;
+            
+            // Color coding based on target ranges
+            if (this.isWithinTarget(categoryData)) {
+                bar.style.backgroundColor = 'var(--primary-green)';
+            } else if (percentage > (categoryData.target?.max || 100)) {
+                bar.style.backgroundColor = 'var(--primary-red)';
+            } else {
+                bar.style.backgroundColor = 'var(--primary-yellow)';
+            }
+        }
+    }
+
+    /**
+     * Check if category is within target range
+     */
+    isWithinTarget(categoryData) {
+        if (!categoryData.target) return true;
+        const percentage = categoryData.percentage || 0;
+        return percentage >= categoryData.target.min && percentage <= categoryData.target.max;
+    }
+
+    /**
+     * Update stat element with color coding
+     */
+    updateStatElementColor(elementId, value, isPercentage = false) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        // Remove existing color classes
+        element.classList.remove('positive', 'negative', 'neutral');
+
+        if (isPercentage) {
+            // For savings rate
+            if (value >= 20) element.classList.add('positive');
+            else if (value >= 10) element.classList.add('neutral');
+            else element.classList.add('negative');
+        } else {
+            // For surplus
+            if (value >= 0) element.classList.add('positive');
+            else element.classList.add('negative');
         }
     }
 
@@ -558,6 +740,12 @@ class ConsciousSpendingApp {
      * Export current scenario
      */
     exportCurrentScenario() {
+        // Validate inputs before export
+        if (!this.validateAllInputs()) {
+            this.showError('Please fix validation errors before exporting');
+            return;
+        }
+
         try {
             const scenarioName = this.scenarioManager.currentScenario;
             this.scenarioManager.exportScenario(scenarioName);
@@ -1063,6 +1251,234 @@ This will adjust your current expense amounts.`)) {
             minimumFractionDigits: precision,
             maximumFractionDigits: precision
         }).format(amount);
+    }
+
+    /**
+     * Validate form input
+     */
+    validateInput(input) {
+        if (!input) return true;
+
+        const value = input.value;
+        const fieldName = input.id;
+        let isValid = true;
+        let errorMessage = '';
+
+        // Clear previous error state
+        this.clearInputError(input);
+
+        // Skip validation for select elements
+        if (input.tagName === 'SELECT') return true;
+
+        // Number validation for numeric inputs
+        if (input.type === 'number' || input.dataset.type === 'currency') {
+            const numValue = parseFloat(value);
+            
+            if (value !== '' && (isNaN(numValue) || numValue < 0)) {
+                isValid = false;
+                errorMessage = 'Please enter a valid positive number';
+            }
+            
+            // Specific range validations
+            if (fieldName.includes('PayFreq') && numValue > 52) {
+                isValid = false;
+                errorMessage = 'Pay frequency cannot exceed 52 (weekly)';
+            }
+            
+            if (fieldName.includes('401k') && numValue > 70000) {
+                isValid = false;
+                errorMessage = '401k contribution exceeds annual limit';
+            }
+            
+            if (fieldName.includes('HSA') && numValue > 4300) {
+                isValid = false;
+                errorMessage = 'HSA contribution exceeds annual limit';
+            }
+        }
+
+        // Age validation for retirement calculator
+        if (fieldName === 'currentAge' || fieldName === 'retirementAge') {
+            const age = parseInt(value);
+            if (age < 18 || age > 100) {
+                isValid = false;
+                errorMessage = 'Please enter a valid age between 18 and 100';
+            }
+        }
+
+        if (fieldName === 'retirementAge') {
+            const currentAge = parseInt(document.getElementById('currentAge')?.value || 0);
+            const retirementAge = parseInt(value);
+            if (retirementAge <= currentAge) {
+                isValid = false;
+                errorMessage = 'Retirement age must be greater than current age';
+            }
+        }
+
+        // Return validation for return rate inputs
+        if (fieldName === 'annualReturn') {
+            const returnRate = parseFloat(value);
+            if (returnRate < 0 || returnRate > 30) {
+                isValid = false;
+                errorMessage = 'Annual return should be between 0% and 30%';
+            }
+        }
+
+        if (!isValid) {
+            this.showInputError(input, errorMessage);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Show input validation error
+     */
+    showInputError(input, message) {
+        input.classList.add('error');
+        
+        // Remove existing error message
+        const existingError = input.parentNode.querySelector('.error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Add error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        input.parentNode.appendChild(errorDiv);
+    }
+
+    /**
+     * Clear input validation error
+     */
+    clearInputError(input) {
+        input.classList.remove('error');
+        const errorMessage = input.parentNode.querySelector('.error-message');
+        if (errorMessage) {
+            errorMessage.remove();
+        }
+    }
+
+    /**
+     * Validate all form inputs
+     */
+    validateAllInputs() {
+        const inputs = document.querySelectorAll('input[type="number"], input[data-type="currency"]');
+        let allValid = true;
+        
+        inputs.forEach(input => {
+            if (!this.validateInput(input)) {
+                allValid = false;
+            }
+        });
+        
+        return allValid;
+    }
+
+    /**
+     * Update what-if analysis calculations
+     */
+    updateWhatIfAnalysis() {
+        const currentScenario = this.scenarioManager.getCurrentScenario();
+        if (!currentScenario) return;
+
+        // Get slider values
+        const salaryIncrease = parseInt(document.getElementById('salaryIncrease')?.value || 0);
+        const bonusChange = parseInt(document.getElementById('bonusChange')?.value || 0);
+        const expenseReduction = parseInt(document.getElementById('expenseReduction')?.value || 0);
+        const investmentIncrease = parseInt(document.getElementById('investmentIncrease')?.value || 0);
+
+        // Calculate what-if scenario
+        const baseCalculations = this.calculator.setScenario(currentScenario);
+        const baseNetIncome = baseCalculations.household.netIncome;
+        const baseExpenses = baseCalculations.expenses.total;
+        const baseSurplus = baseNetIncome - baseExpenses;
+
+        // Apply changes
+        const newNetIncome = baseNetIncome * (1 + salaryIncrease / 100);
+        const newExpenses = baseExpenses * (1 - expenseReduction / 100);
+        const newSurplus = newNetIncome - newExpenses;
+
+        // Update display
+        this.updateElement('whatIfBefore', this.formatCurrency(baseSurplus));
+        this.updateElement('whatIfAfter', this.formatCurrency(newSurplus));
+        this.updateElement('whatIfDifference', this.formatCurrency(newSurplus - baseSurplus));
+    }
+
+    /**
+     * Add a new financial goal
+     */
+    addFinancialGoal() {
+        const goalName = prompt('Enter goal name:');
+        const goalAmount = parseFloat(prompt('Enter target amount:'));
+        const timeframe = parseInt(prompt('Enter timeframe (months):'));
+
+        if (goalName && goalAmount && timeframe) {
+            const goal = {
+                name: goalName,
+                targetAmount: goalAmount,
+                currentAmount: 0,
+                timeframe: timeframe,
+                monthlyTarget: goalAmount / timeframe
+            };
+
+            // Add to current scenario (this would need proper storage implementation)
+            console.log('Added goal:', goal);
+            this.updateProjectionSummary();
+        }
+    }
+
+    /**
+     * Update retirement calculation
+     */
+    updateRetirementCalculation() {
+        const currentAge = parseInt(document.getElementById('currentAge')?.value || 30);
+        const retirementAge = parseInt(document.getElementById('retirementAge')?.value || 65);
+        const currentSavings = parseFloat(document.getElementById('currentSavings')?.value || 0);
+        const monthlyContribution = parseFloat(document.getElementById('monthlyContribution')?.value || 0);
+        const annualReturn = parseFloat(document.getElementById('annualReturn')?.value || 7) / 100;
+        const retirementGoal = parseFloat(document.getElementById('retirementGoal')?.value || 1000000);
+
+        const yearsToRetirement = retirementAge - currentAge;
+        const monthlyReturn = annualReturn / 12;
+        const totalMonths = yearsToRetirement * 12;
+
+        // Future value calculation
+        const futureValueCurrentSavings = currentSavings * Math.pow(1 + annualReturn, yearsToRetirement);
+        const futureValueContributions = monthlyContribution * 
+            ((Math.pow(1 + monthlyReturn, totalMonths) - 1) / monthlyReturn);
+        
+        const totalProjected = futureValueCurrentSavings + futureValueContributions;
+
+        // Update display
+        this.updateElement('retirementProjection', this.formatCurrency(totalProjected));
+        this.updateElement('retirementStatus', 
+            totalProjected >= retirementGoal ? 'On Track' : 'Need More');
+        
+        const monthlyNeeded = Math.max(0, 
+            ((retirementGoal - futureValueCurrentSavings) * monthlyReturn) / 
+            (Math.pow(1 + monthlyReturn, totalMonths) - 1)
+        );
+        this.updateElement('monthlyNeeded', this.formatCurrency(monthlyNeeded));
+    }
+
+    /**
+     * Update projection summary with current data
+     */
+    updateProjectionSummary() {
+        const calculations = this.calculator.calculations;
+        if (!calculations) return;
+
+        const monthlyNet = calculations.household.monthlyNetIncome;
+        const monthlyExpenses = calculations.expenses.total;
+        const monthlySurplus = monthlyNet - monthlyExpenses;
+
+        // Update 12-month projections
+        this.updateElement('projectedIncome', this.formatCurrency(monthlyNet * 12));
+        this.updateElement('projectedExpenses', this.formatCurrency(monthlyExpenses * 12));
+        this.updateElement('projectedSurplus', this.formatCurrency(monthlySurplus * 12));
     }
 
     /**

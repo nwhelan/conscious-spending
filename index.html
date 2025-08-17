@@ -680,9 +680,213 @@
         <!-- Projections Tab -->
         <section id="projections" class="tab-content">
             <div class="projections-grid">
-                <div class="card">
-                    <h2>Financial Projections</h2>
-                    <p>Projection modeling coming soon...</p>
+                <!-- 12-Month Projection -->
+                <div class="card projection-card">
+                    <h2>12-Month Financial Projection</h2>
+                    <div class="projection-summary">
+                        <div class="projection-item">
+                            <span class="label">Total Net Income (12 months)</span>
+                            <span class="value" id="projectedNetIncome">$195,600</span>
+                        </div>
+                        <div class="projection-item">
+                            <span class="label">Total Expenses (12 months)</span>
+                            <span class="value" id="projectedExpenses">$148,860</span>
+                        </div>
+                        <div class="projection-item">
+                            <span class="label">Total Surplus (12 months)</span>
+                            <span class="value positive" id="projectedSurplus">$46,740</span>
+                        </div>
+                    </div>
+                    <div class="projection-chart">
+                        <canvas id="projectionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Financial Goals -->
+                <div class="card goals-card">
+                    <h2>Financial Goals Progress</h2>
+                    <div class="goals-list">
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-name">Emergency Fund</span>
+                                <button class="goal-edit-btn">✏️</button>
+                            </div>
+                            <div class="goal-details">
+                                <span class="goal-target">Target: $30,000 (6 months expenses)</span>
+                                <span class="goal-timeline">Est. completion: <span id="emergencyFundTimeline">18 months</span></span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" id="emergencyFundProgress" style="width: 50%"></div>
+                            </div>
+                            <div class="goal-amounts">
+                                <span class="current-amount">$15,000</span>
+                                <span class="target-amount">$30,000</span>
+                            </div>
+                        </div>
+
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-name">House Down Payment</span>
+                                <button class="goal-edit-btn">✏️</button>
+                            </div>
+                            <div class="goal-details">
+                                <span class="goal-target">Target: $100,000 (20% down)</span>
+                                <span class="goal-timeline">Est. completion: <span id="houseDownPaymentTimeline">5.5 years</span></span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" id="houseDownPaymentProgress" style="width: 35%"></div>
+                            </div>
+                            <div class="goal-amounts">
+                                <span class="current-amount">$35,000</span>
+                                <span class="target-amount">$100,000</span>
+                            </div>
+                        </div>
+
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-name">Retirement by 65</span>
+                                <button class="goal-edit-btn">✏️</button>
+                            </div>
+                            <div class="goal-details">
+                                <span class="goal-target">Target: $2,000,000</span>
+                                <span class="goal-timeline">Est. completion: <span id="retirementTimeline">On track</span></span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" id="retirementProgress" style="width: 15%"></div>
+                            </div>
+                            <div class="goal-amounts">
+                                <span class="current-amount">$300,000</span>
+                                <span class="target-amount">$2,000,000</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="goal-actions">
+                        <button class="btn-primary" id="addGoalBtn">Add New Goal</button>
+                        <button class="btn-secondary" id="adjustGoalsBtn">Adjust Timeline</button>
+                    </div>
+                </div>
+
+                <!-- What-If Analysis -->
+                <div class="card whatif-card">
+                    <h2>What-If Analysis</h2>
+                    <div class="whatif-controls">
+                        <div class="whatif-item">
+                            <label for="salaryIncrease">Salary Increase %</label>
+                            <input type="range" id="salaryIncrease" min="0" max="50" value="0" step="5">
+                            <span id="salaryIncreaseValue">0%</span>
+                        </div>
+                        
+                        <div class="whatif-item">
+                            <label for="expenseReduction">Expense Reduction %</label>
+                            <input type="range" id="expenseReduction" min="0" max="30" value="0" step="5">
+                            <span id="expenseReductionValue">0%</span>
+                        </div>
+                        
+                        <div class="whatif-item">
+                            <label for="additionalIncome">Additional Monthly Income</label>
+                            <input type="number" id="additionalIncome" min="0" max="10000" value="0" step="500" placeholder="$0">
+                        </div>
+                    </div>
+                    
+                    <div class="whatif-results">
+                        <h3>Impact on Annual Surplus</h3>
+                        <div class="whatif-comparison">
+                            <div class="whatif-before">
+                                <span class="label">Current</span>
+                                <span class="value" id="currentAnnualSurplus">$46,740</span>
+                            </div>
+                            <div class="whatif-arrow">→</div>
+                            <div class="whatif-after">
+                                <span class="label">With Changes</span>
+                                <span class="value" id="projectedAnnualSurplus">$46,740</span>
+                            </div>
+                        </div>
+                        <div class="whatif-difference">
+                            <span class="label">Difference:</span>
+                            <span class="value" id="surplusDifference">+$0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scenario Comparison -->
+                <div class="card scenario-comparison-card">
+                    <h2>Scenario Comparison</h2>
+                    <div class="scenario-selector-grid">
+                        <div class="scenario-select">
+                            <label for="compareScenario1">Scenario 1</label>
+                            <select id="compareScenario1">
+                                <option value="baseline">Baseline 2025</option>
+                                <option value="optimistic">Optimistic</option>
+                                <option value="conservative">Conservative</option>
+                            </select>
+                        </div>
+                        <div class="scenario-select">
+                            <label for="compareScenario2">Scenario 2</label>
+                            <select id="compareScenario2">
+                                <option value="optimistic">Optimistic</option>
+                                <option value="baseline">Baseline 2025</option>
+                                <option value="conservative">Conservative</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-chart">
+                        <canvas id="scenarioComparisonChart"></canvas>
+                    </div>
+                    
+                    <div class="comparison-summary">
+                        <div class="comparison-metric">
+                            <span class="metric-name">Monthly Surplus Difference</span>
+                            <span class="metric-value" id="surplusComparison">+$1,250</span>
+                        </div>
+                        <div class="comparison-metric">
+                            <span class="metric-name">Annual Savings Rate Difference</span>
+                            <span class="metric-value" id="savingsRateComparison">+5.2%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Retirement Calculator -->
+                <div class="card retirement-card">
+                    <h2>Retirement Calculator</h2>
+                    <div class="retirement-inputs">
+                        <div class="retirement-input">
+                            <label for="currentAge">Current Age</label>
+                            <input type="number" id="currentAge" value="30" min="18" max="70">
+                        </div>
+                        <div class="retirement-input">
+                            <label for="retirementAge">Retirement Age</label>
+                            <input type="number" id="retirementAge" value="65" min="50" max="80">
+                        </div>
+                        <div class="retirement-input">
+                            <label for="currentRetirementSavings">Current Retirement Savings</label>
+                            <input type="number" id="currentRetirementSavings" value="300000" min="0" step="10000">
+                        </div>
+                        <div class="retirement-input">
+                            <label for="monthlyRetirementContribution">Monthly Contribution</label>
+                            <input type="number" id="monthlyRetirementContribution" value="2500" min="0" step="100">
+                        </div>
+                        <div class="retirement-input">
+                            <label for="expectedReturn">Expected Annual Return (%)</label>
+                            <input type="number" id="expectedReturn" value="7" min="3" max="12" step="0.5">
+                        </div>
+                    </div>
+                    
+                    <div class="retirement-results">
+                        <div class="retirement-projection">
+                            <span class="label">Projected Retirement Balance</span>
+                            <span class="value large" id="retirementProjection">$4,250,000</span>
+                        </div>
+                        <div class="retirement-monthly">
+                            <span class="label">Estimated Monthly Income (4% rule)</span>
+                            <span class="value" id="retirementMonthlyIncome">$14,167</span>
+                        </div>
+                        <div class="retirement-status">
+                            <span class="label">Retirement Readiness</span>
+                            <span class="value success" id="retirementStatus">On Track</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
