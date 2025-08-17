@@ -1,0 +1,116 @@
+{
+  "name": "Ramit Sethi's Conscious Spending Plan Template",
+  "description": "A template based on Ramit Sethi's 4-category conscious spending framework",
+  "version": "1.0",
+  "categories": {
+    "fixedCosts": {
+      "description": "Basic expenses needed to live (50-60% of take-home pay)",
+      "targetPercentage": { "min": 50, "max": 60 },
+      "subcategories": {
+        "housing": {
+          "description": "Rent/mortgage, utilities, insurance",
+          "items": ["rent", "mortgage", "utilities", "rentersInsurance", "homeownersInsurance", "propertyTax", "HOAFees"]
+        },
+        "transportation": {
+          "description": "Car payments, insurance, gas, maintenance, public transit",
+          "items": ["carPayment", "carInsurance", "gasAndMaintenance", "publicTransport", "parking"]
+        },
+        "essentials": {
+          "description": "Groceries, basic clothing, phone, internet",
+          "items": ["groceries", "basicClothing", "cellPhone", "internet", "necessarySubscriptions"]
+        },
+        "debt": {
+          "description": "Credit card minimums, student loans, other debt payments",
+          "items": ["creditCardMinimums", "studentLoans", "personalLoans", "otherDebt"]
+        }
+      }
+    },
+    "investments": {
+      "description": "Long-term wealth building (10% of take-home pay)",
+      "targetPercentage": { "min": 10, "max": 10 },
+      "subcategories": {
+        "retirement": {
+          "description": "401(k), IRA, other retirement accounts",
+          "items": ["401kMatch", "rothIRA", "traditionalIRA", "retirementBrokerage"]
+        },
+        "taxableInvestments": {
+          "description": "Brokerage accounts, index funds, stocks",
+          "items": ["brokerageAccount", "indexFunds", "individualStocks", "ETFs"]
+        }
+      }
+    },
+    "savings": {
+      "description": "Short and medium-term savings goals (5-10% of take-home pay)",
+      "targetPercentage": { "min": 5, "max": 10 },
+      "subcategories": {
+        "emergency": {
+          "description": "Emergency fund (3-6 months of expenses)",
+          "items": ["emergencyFund"]
+        },
+        "shortTermGoals": {
+          "description": "Vacation, gifts, upcoming purchases",
+          "items": ["vacation", "gifts", "electronics", "furniture"]
+        },
+        "mediumTermGoals": {
+          "description": "House down payment, car replacement, major purchases",
+          "items": ["houseDownPayment", "carReplacement", "homeImprovements", "wedding"]
+        }
+      }
+    },
+    "guiltFreeSpending": {
+      "description": "Fun money to spend on whatever you want (20-35% of take-home pay)",
+      "targetPercentage": { "min": 20, "max": 35 },
+      "subcategories": {
+        "dining": {
+          "description": "Restaurants, takeout, food delivery",
+          "items": ["restaurants", "takeout", "foodDelivery", "drinks"]
+        },
+        "entertainment": {
+          "description": "Movies, concerts, shows, activities",
+          "items": ["movies", "concerts", "shows", "activities", "games"]
+        },
+        "personalSpending": {
+          "description": "Shopping, hobbies, personal interests",
+          "items": ["clothing", "hobbies", "books", "personalCare", "miscShopping"]
+        },
+        "subscriptions": {
+          "description": "Non-essential subscriptions and memberships",
+          "items": ["streamingServices", "gymMembership", "magazines", "apps"]
+        },
+        "travel": {
+          "description": "Non-essential travel and experiences",
+          "items": ["weekendTrips", "experiences", "luxuryTravel"]
+        }
+      }
+    }
+  },
+  "guidelines": {
+    "fixedCosts": [
+      "These are your non-negotiable expenses",
+      "If over 60%, look for ways to reduce housing or transportation costs",
+      "Consider location arbitrage or downsizing if necessary"
+    ],
+    "investments": [
+      "Pay yourself first - automate this category",
+      "Take advantage of employer 401(k) match",
+      "Invest in low-cost index funds for long-term growth"
+    ],
+    "savings": [
+      "Build emergency fund first (3-6 months of expenses)",
+      "Save for specific goals with target dates",
+      "Use high-yield savings accounts for short-term goals"
+    ],
+    "guiltFreeSpending": [
+      "This is your fun money - spend it without guilt!",
+      "Automate the amount you want to spend",
+      "Don't feel bad about spending on things you love",
+      "If you need more, cut from other categories first"
+    ]
+  },
+  "automationTips": [
+    "Set up automatic transfers for each category",
+    "Use separate accounts for different savings goals",
+    "Automate investments to occur right after payday",
+    "Review and adjust percentages quarterly"
+  ]
+}

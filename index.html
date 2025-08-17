@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conscious Spending Planner</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">💰 Conscious Spending Planner</h1>
+            <div class="header-controls">
+                <select id="scenarioSelector" class="scenario-selector">
+                    <option value="baseline">Baseline 2025</option>
+                    <option value="optimistic">Optimistic</option>
+                    <option value="conservative">Conservative</option>
+                </select>
+                <div class="view-toggle">
+                    <button id="person1View" class="view-btn active" data-view="person1">Partner 1</button>
+                    <button id="combinedView" class="view-btn" data-view="combined">Combined</button>
+                    <button id="person2View" class="view-btn" data-view="person2">Partner 2</button>
+                </div>
+                <button id="settingsBtn" class="settings-btn">⚙️</button>
+            </div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <button class="nav-tab active" data-tab="dashboard">📊 Dashboard</button>
+        <button class="nav-tab" data-tab="income">💰 Income</button>
+        <button class="nav-tab" data-tab="expenses">📝 Expenses</button>
+        <button class="nav-tab" data-tab="projections">📈 Projections</button>
+        <button class="nav-tab" data-tab="scenarios">⚙️ Scenarios</button>
+    </nav>
+
+    <main class="main-content">
+        <!-- Dashboard Tab -->
+        <section id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="card summary-card">
+                    <h2>Financial Summary</h2>
+                    <div class="summary-stats">
+                        <div class="stat">
+                            <span class="stat-label">Monthly Net Income</span>
+                            <span class="stat-value" id="monthlyNetIncome">$0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Monthly Expenses</span>
+                            <span class="stat-value" id="monthlyExpenses">$0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Monthly Surplus</span>
+                            <span class="stat-value" id="monthlySurplus">$0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Annual Savings Rate</span>
+                            <span class="stat-value" id="savingsRate">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card income-card">
+                    <h3>Take-Home Pay Breakdown</h3>
+                    <div class="income-breakdown">
+                        <canvas id="incomeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card expenses-card">
+                    <h3>Expense Categories</h3>
+                    <div class="expense-breakdown">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card cashflow-card">
+                    <h3>12-Month Cash Flow</h3>
+                    <div class="cashflow-chart">
+                        <canvas id="cashflowChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card ramit-card">
+                    <h3>Conscious Spending Plan</h3>
+                    <div class="ramit-breakdown">
+                        <div class="category-bar">
+                            <span class="category-label">Fixed Costs (50-60%)</span>
+                            <div class="bar-container">
+                                <div class="bar target-bar" style="width: 60%"></div>
+                                <div class="bar actual-bar fixed-costs" id="fixedCostsBar"></div>
+                            </div>
+                            <span class="category-value" id="fixedCostsValue">0%</span>
+                        </div>
+                        <div class="category-bar">
+                            <span class="category-label">Investments (10%)</span>
+                            <div class="bar-container">
+                                <div class="bar target-bar" style="width: 10%"></div>
+                                <div class="bar actual-bar investments" id="investmentsBar"></div>
+                            </div>
+                            <span class="category-value" id="investmentsValue">0%</span>
+                        </div>
+                        <div class="category-bar">
+                            <span class="category-label">Savings (5-10%)</span>
+                            <div class="bar-container">
+                                <div class="bar target-bar" style="width: 10%"></div>
+                                <div class="bar actual-bar savings" id="savingsBar"></div>
+                            </div>
+                            <span class="category-value" id="savingsValue">0%</span>
+                        </div>
+                        <div class="category-bar">
+                            <span class="category-label">Guilt-Free (20-35%)</span>
+                            <div class="bar-container">
+                                <div class="bar target-bar" style="width: 25%"></div>
+                                <div class="bar actual-bar guilt-free" id="guiltFreeBar"></div>
+                            </div>
+                            <span class="category-value" id="guiltFreeValue">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card goals-card">
+                    <h3>Financial Goals</h3>
+                    <div class="goals-list">
+                        <div class="goal-item">
+                            <span class="goal-name">Emergency Fund</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 75%"></div>
+                            </div>
+                            <span class="goal-value">$15,000 / $20,000</span>
+                        </div>
+                        <div class="goal-item">
+                            <span class="goal-name">House Down Payment</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 35%"></div>
+                            </div>
+                            <span class="goal-value">$35,000 / $100,000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Income Tab -->
+        <section id="income" class="tab-content">
+            <div class="income-grid">
+                <div class="card" id="person1IncomeCard">
+                    <h2>Partner 1 Income</h2>
+                    <div class="income-form">
+                        <div class="person-section" id="person1Income">
+                            <div class="person-header">
+                                <h3 id="person1Name">Partner 1</h3>
+                                <div class="person-summary">
+                                    <span class="gross-income">Gross: <span id="person1GrossIncome">$137,000</span></span>
+                                    <span class="net-income">Net: <span id="person1NetIncome">$95,000</span></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="person1Salary">Annual Salary</label>
+                                    <input type="number" id="person1Salary" value="120000" min="0" step="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="person1Bonus">Annual Bonus</label>
+                                    <input type="number" id="person1Bonus" value="15000" min="0" step="1000">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="person1Other">Other Income</label>
+                                    <input type="number" id="person1Other" value="2000" min="0" step="500">
+                                </div>
+                                <div class="form-group">
+                                    <label for="person1PayFreq">Pay Frequency</label>
+                                    <select id="person1PayFreq">
+                                        <option value="weekly">Weekly</option>
+                                        <option value="biweekly" selected>Bi-weekly</option>
+                                        <option value="semimonthly">Semi-monthly</option>
+                                        <option value="monthly">Monthly</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <h4>Pre-Tax Deductions</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="person1_401k">401(k) Contribution <span class="limit">(2025 limit: $23,500)</span></label>
+                                    <input type="number" id="person1_401k" value="18000" min="0" max="23500" step="500">
+                                </div>
+                                <div class="form-group">
+                                    <label for="person1Health">Health Insurance</label>
+                                    <input type="number" id="person1Health" value="3600" min="0" step="100">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="person1HSA">HSA Contribution <span class="limit">(2025 limit: $4,300/$8,550)</span></label>
+                                    <input type="number" id="person1HSA" value="4300" min="0" max="8550" step="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="person1Other401k">Other Pre-Tax</label>
+                                    <input type="number" id="person1Other401k" value="0" min="0" step="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" id="person2IncomeCard">
+                    <h2>Partner 2 Income</h2>
+                    <div class="income-form">
+                        <div class="person-section" id="person2Income">
+                            <div class="person-header">
+                                <h3 id="person2Name">Partner 2</h3>
+                                <div class="person-summary">
+                                    <span class="gross-income">Gross: <span id="person2GrossIncome">$90,000</span></span>
+                                    <span class="net-income">Net: <span id="person2NetIncome">$68,000</span></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="person2Salary">Annual Salary</label>
+                                    <input type="number" id="person2Salary" value="85000" min="0" step="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="person2Bonus">Annual Bonus</label>
+                                    <input type="number" id="person2Bonus" value="5000" min="0" step="1000">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="person2Other">Other Income</label>
+                                    <input type="number" id="person2Other" value="0" min="0" step="500">
+                                </div>
+                                <div class="form-group">
+                                    <label for="person2PayFreq">Pay Frequency</label>
+                                    <select id="person2PayFreq">
+                                        <option value="weekly">Weekly</option>
+                                        <option value="biweekly">Bi-weekly</option>
+                                        <option value="semimonthly">Semi-monthly</option>
+                                        <option value="monthly" selected>Monthly</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <h4>Pre-Tax Deductions</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="person2_401k">401(k) Contribution <span class="limit">(2025 limit: $23,500)</span></label>
+                                    <input type="number" id="person2_401k" value="12000" min="0" max="23500" step="500">
+                                </div>
+                                <div class="form-group">
+                                    <label for="person2Health">Health Insurance</label>
+                                    <input type="number" id="person2Health" value="0" min="0" step="100">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="person2HSA">HSA Contribution <span class="limit">(2025 limit: $4,300/$8,550)</span></label>
+                                    <input type="number" id="person2HSA" value="0" min="0" max="8550" step="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="person2Other401k">Other Pre-Tax</label>
+                                    <input type="number" id="person2Other401k" value="0" min="0" step="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" id="householdSummaryCard">
+                    <h2>Household Summary</h2>
+                    <div class="household-summary">
+                        <div class="summary-row">
+                            <div class="summary-item">
+                                <span class="label">Total Gross Income</span>
+                                <span class="value" id="totalGrossIncome">$227,000</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Total Pre-Tax Deductions</span>
+                                <span class="value" id="totalPreTaxDeductions">$37,900</span>
+                            </div>
+                        </div>
+                        <div class="summary-row">
+                            <div class="summary-item">
+                                <span class="label">Total Federal Tax</span>
+                                <span class="value" id="totalFederalTax">$25,000</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Total State Tax</span>
+                                <span class="value" id="totalStateTax">$12,000</span>
+                            </div>
+                        </div>
+                        <div class="summary-row">
+                            <div class="summary-item">
+                                <span class="label">Total FICA</span>
+                                <span class="value" id="totalFICA">$14,500</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Total Net Income</span>
+                                <span class="value highlight" id="totalNetIncome">$163,000</span>
+                            </div>
+                        </div>
+                        <div class="effective-rate">
+                            <span class="label">Effective Tax Rate</span>
+                            <span class="value" id="effectiveTaxRate">28.2%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Expenses Tab -->
+        <section id="expenses" class="tab-content">
+            <div class="expenses-grid">
+                <!-- Fixed Costs -->
+                <div class="card expense-category-card">
+                    <div class="category-header">
+                        <h2>🏠 Fixed Costs</h2>
+                        <div class="category-summary">
+                            <span class="target-range">Target: 50-60%</span>
+                            <span class="current-amount">Current: <span id="fixedCostsTotal">$6,005</span></span>
+                            <span class="current-percentage">(<span id="fixedCostsPercentage">45%</span>)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="expense-subcategory">
+                        <h3>Housing</h3>
+                        <div class="expense-items">
+                            <div class="expense-item">
+                                <label for="rent">Rent/Mortgage</label>
+                                <input type="number" id="rent" value="3500" min="0" step="50">
+                                <select id="rentAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="utilities">Utilities</label>
+                                <input type="number" id="utilities" value="200" min="0" step="10">
+                                <select id="utilitiesAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="insurance">Renters/Home Insurance</label>
+                                <input type="number" id="insurance" value="25" min="0" step="5">
+                                <select id="insuranceAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="expense-subcategory">
+                        <h3>Transportation</h3>
+                        <div class="expense-items">
+                            <div class="expense-item">
+                                <label for="carPayment1">Car Payment 1</label>
+                                <input type="number" id="carPayment1" value="450" min="0" step="25">
+                                <select id="carPayment1Assigned" class="assignment-select">
+                                    <option value="person1" selected>Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                    <option value="shared">Shared</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="carPayment2">Car Payment 2</label>
+                                <input type="number" id="carPayment2" value="350" min="0" step="25">
+                                <select id="carPayment2Assigned" class="assignment-select">
+                                    <option value="person2" selected>Partner 2</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="shared">Shared</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="carInsurance">Car Insurance</label>
+                                <input type="number" id="carInsurance" value="180" min="0" step="10">
+                                <select id="carInsuranceAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="gasAndMaintenance">Gas & Maintenance</label>
+                                <input type="number" id="gasAndMaintenance" value="400" min="0" step="25">
+                                <select id="gasAndMaintenanceAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="expense-subcategory">
+                        <h3>Essentials</h3>
+                        <div class="expense-items">
+                            <div class="expense-item">
+                                <label for="groceries">Groceries</label>
+                                <input type="number" id="groceries" value="800" min="0" step="25">
+                                <select id="groceriesAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="cellPhone">Cell Phone</label>
+                                <input type="number" id="cellPhone" value="120" min="0" step="10">
+                                <select id="cellPhoneAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="internet">Internet</label>
+                                <input type="number" id="internet" value="80" min="0" step="10">
+                                <select id="internetAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="expense-subcategory">
+                        <h3>Debt Payments</h3>
+                        <div class="expense-items">
+                            <div class="expense-item">
+                                <label for="studentLoan1">Student Loan 1</label>
+                                <input type="number" id="studentLoan1" value="300" min="0" step="25">
+                                <select id="studentLoan1Assigned" class="assignment-select">
+                                    <option value="person1" selected>Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                    <option value="shared">Shared</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="studentLoan2">Student Loan 2</label>
+                                <input type="number" id="studentLoan2" value="150" min="0" step="25">
+                                <select id="studentLoan2Assigned" class="assignment-select">
+                                    <option value="person2" selected>Partner 2</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="shared">Shared</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Investments -->
+                <div class="card expense-category-card">
+                    <div class="category-header">
+                        <h2>📈 Investments</h2>
+                        <div class="category-summary">
+                            <span class="target-range">Target: 10%</span>
+                            <span class="current-amount">Current: <span id="investmentsTotal">$2,000</span></span>
+                            <span class="current-percentage">(<span id="investmentsPercentage">15%</span>)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="expense-subcategory">
+                        <div class="expense-items">
+                            <div class="expense-item">
+                                <label for="additionalRetirement">Additional Retirement</label>
+                                <input type="number" id="additionalRetirement" value="1000" min="0" step="100">
+                                <select id="additionalRetirementAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="brokerage">Brokerage Account</label>
+                                <input type="number" id="brokerage" value="500" min="0" step="100">
+                                <select id="brokerageAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="rothIRA">Roth IRA</label>
+                                <input type="number" id="rothIRA" value="500" min="0" step="100">
+                                <select id="rothIRAAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Savings -->
+                <div class="card expense-category-card">
+                    <div class="category-header">
+                        <h2>💰 Savings</h2>
+                        <div class="category-summary">
+                            <span class="target-range">Target: 5-10%</span>
+                            <span class="current-amount">Current: <span id="savingsTotal">$2,400</span></span>
+                            <span class="current-percentage">(<span id="savingsPercentage">18%</span>)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="expense-subcategory">
+                        <div class="expense-items">
+                            <div class="expense-item">
+                                <label for="emergency">Emergency Fund</label>
+                                <input type="number" id="emergency" value="800" min="0" step="100">
+                                <select id="emergencyAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="vacation">Vacation</label>
+                                <input type="number" id="vacation" value="400" min="0" step="50">
+                                <select id="vacationAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="houseDownPayment">House Down Payment</label>
+                                <input type="number" id="houseDownPayment" value="1000" min="0" step="100">
+                                <select id="houseDownPaymentAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="carReplacement">Car Replacement</label>
+                                <input type="number" id="carReplacement" value="200" min="0" step="50">
+                                <select id="carReplacementAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guilt-Free Spending -->
+                <div class="card expense-category-card">
+                    <div class="category-header">
+                        <h2>🎉 Guilt-Free Spending</h2>
+                        <div class="category-summary">
+                            <span class="target-range">Target: 20-35%</span>
+                            <span class="current-amount">Current: <span id="guiltFreeTotal">$2,000</span></span>
+                            <span class="current-percentage">(<span id="guiltFreePercentage">15%</span>)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="expense-subcategory">
+                        <div class="expense-items">
+                            <div class="expense-item">
+                                <label for="dining">Dining Out</label>
+                                <input type="number" id="dining" value="800" min="0" step="25">
+                                <select id="diningAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="entertainment">Entertainment</label>
+                                <input type="number" id="entertainment" value="300" min="0" step="25">
+                                <select id="entertainmentAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="hobbies">Hobbies (Partner 1)</label>
+                                <input type="number" id="hobbies" value="200" min="0" step="25">
+                                <select id="hobbiesAssigned" class="assignment-select">
+                                    <option value="person1" selected>Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                    <option value="shared">Shared</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="personalShopping">Personal Shopping (Partner 2)</label>
+                                <input type="number" id="personalShopping" value="200" min="0" step="25">
+                                <select id="personalShoppingAssigned" class="assignment-select">
+                                    <option value="person2" selected>Partner 2</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="shared">Shared</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="subscriptions">Subscriptions</label>
+                                <input type="number" id="subscriptions" value="150" min="0" step="10">
+                                <select id="subscriptionsAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="gifts">Gifts</label>
+                                <input type="number" id="gifts" value="100" min="0" step="25">
+                                <select id="giftsAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                            <div class="expense-item">
+                                <label for="miscellaneous">Miscellaneous</label>
+                                <input type="number" id="miscellaneous" value="250" min="0" step="25">
+                                <select id="miscellaneousAssigned" class="assignment-select">
+                                    <option value="shared" selected>Shared</option>
+                                    <option value="person1">Partner 1</option>
+                                    <option value="person2">Partner 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expense Summary -->
+                <div class="card expense-summary-card">
+                    <h2>Monthly Expense Summary</h2>
+                    <div class="expense-summary">
+                        <div class="summary-item large">
+                            <span class="label">Total Monthly Expenses</span>
+                            <span class="value" id="totalMonthlyExpenses">$12,405</span>
+                        </div>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <span class="label">Fixed Costs</span>
+                                <span class="value" id="fixedCostsSummary">$6,005</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Investments</span>
+                                <span class="value" id="investmentsSummary">$2,000</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Savings</span>
+                                <span class="value" id="savingsSummary">$2,400</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Guilt-Free</span>
+                                <span class="value" id="guiltFreeSummary">$2,000</span>
+                            </div>
+                        </div>
+                        <div class="expense-actions">
+                            <button class="btn-secondary" id="resetExpensesBtn">Reset to Defaults</button>
+                            <button class="btn-primary" id="optimizeExpensesBtn">Optimize for Ramit's Plan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projections Tab -->
+        <section id="projections" class="tab-content">
+            <div class="projections-grid">
+                <!-- 12-Month Projection -->
+                <div class="card projection-card">
+                    <h2>12-Month Financial Projection</h2>
+                    <div class="projection-summary">
+                        <div class="projection-item">
+                            <span class="label">Total Net Income (12 months)</span>
+                            <span class="value" id="projectedNetIncome">$195,600</span>
+                        </div>
+                        <div class="projection-item">
+                            <span class="label">Total Expenses (12 months)</span>
+                            <span class="value" id="projectedExpenses">$148,860</span>
+                        </div>
+                        <div class="projection-item">
+                            <span class="label">Total Surplus (12 months)</span>
+                            <span class="value positive" id="projectedSurplus">$46,740</span>
+                        </div>
+                    </div>
+                    <div class="projection-chart">
+                        <canvas id="projectionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Financial Goals -->
+                <div class="card goals-card">
+                    <h2>Financial Goals Progress</h2>
+                    <div class="goals-list">
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-name">Emergency Fund</span>
+                                <button class="goal-edit-btn">✏️</button>
+                            </div>
+                            <div class="goal-details">
+                                <span class="goal-target">Target: $30,000 (6 months expenses)</span>
+                                <span class="goal-timeline">Est. completion: <span id="emergencyFundTimeline">18 months</span></span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" id="emergencyFundProgress" style="width: 50%"></div>
+                            </div>
+                            <div class="goal-amounts">
+                                <span class="current-amount">$15,000</span>
+                                <span class="target-amount">$30,000</span>
+                            </div>
+                        </div>
+
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-name">House Down Payment</span>
+                                <button class="goal-edit-btn">✏️</button>
+                            </div>
+                            <div class="goal-details">
+                                <span class="goal-target">Target: $100,000 (20% down)</span>
+                                <span class="goal-timeline">Est. completion: <span id="houseDownPaymentTimeline">5.5 years</span></span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" id="houseDownPaymentProgress" style="width: 35%"></div>
+                            </div>
+                            <div class="goal-amounts">
+                                <span class="current-amount">$35,000</span>
+                                <span class="target-amount">$100,000</span>
+                            </div>
+                        </div>
+
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-name">Retirement by 65</span>
+                                <button class="goal-edit-btn">✏️</button>
+                            </div>
+                            <div class="goal-details">
+                                <span class="goal-target">Target: $2,000,000</span>
+                                <span class="goal-timeline">Est. completion: <span id="retirementTimeline">On track</span></span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" id="retirementProgress" style="width: 15%"></div>
+                            </div>
+                            <div class="goal-amounts">
+                                <span class="current-amount">$300,000</span>
+                                <span class="target-amount">$2,000,000</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="goal-actions">
+                        <button class="btn-primary" id="addGoalBtn">Add New Goal</button>
+                        <button class="btn-secondary" id="adjustGoalsBtn">Adjust Timeline</button>
+                    </div>
+                </div>
+
+                <!-- What-If Analysis -->
+                <div class="card whatif-card">
+                    <h2>What-If Analysis</h2>
+                    <div class="whatif-controls">
+                        <div class="whatif-item">
+                            <label for="salaryIncrease">Salary Increase %</label>
+                            <input type="range" id="salaryIncrease" min="0" max="50" value="0" step="5">
+                            <span id="salaryIncreaseValue">0%</span>
+                        </div>
+                        
+                        <div class="whatif-item">
+                            <label for="expenseReduction">Expense Reduction %</label>
+                            <input type="range" id="expenseReduction" min="0" max="30" value="0" step="5">
+                            <span id="expenseReductionValue">0%</span>
+                        </div>
+                        
+                        <div class="whatif-item">
+                            <label for="additionalIncome">Additional Monthly Income</label>
+                            <input type="number" id="additionalIncome" min="0" max="10000" value="0" step="500" placeholder="$0">
+                        </div>
+                    </div>
+                    
+                    <div class="whatif-results">
+                        <h3>Impact on Annual Surplus</h3>
+                        <div class="whatif-comparison">
+                            <div class="whatif-before">
+                                <span class="label">Current</span>
+                                <span class="value" id="currentAnnualSurplus">$46,740</span>
+                            </div>
+                            <div class="whatif-arrow">→</div>
+                            <div class="whatif-after">
+                                <span class="label">With Changes</span>
+                                <span class="value" id="projectedAnnualSurplus">$46,740</span>
+                            </div>
+                        </div>
+                        <div class="whatif-difference">
+                            <span class="label">Difference:</span>
+                            <span class="value" id="surplusDifference">+$0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scenario Comparison -->
+                <div class="card scenario-comparison-card">
+                    <h2>Scenario Comparison</h2>
+                    <div class="scenario-selector-grid">
+                        <div class="scenario-select">
+                            <label for="compareScenario1">Scenario 1</label>
+                            <select id="compareScenario1">
+                                <option value="baseline">Baseline 2025</option>
+                                <option value="optimistic">Optimistic</option>
+                                <option value="conservative">Conservative</option>
+                            </select>
+                        </div>
+                        <div class="scenario-select">
+                            <label for="compareScenario2">Scenario 2</label>
+                            <select id="compareScenario2">
+                                <option value="optimistic">Optimistic</option>
+                                <option value="baseline">Baseline 2025</option>
+                                <option value="conservative">Conservative</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-chart">
+                        <canvas id="scenarioComparisonChart"></canvas>
+                    </div>
+                    
+                    <div class="comparison-summary">
+                        <div class="comparison-metric">
+                            <span class="metric-name">Monthly Surplus Difference</span>
+                            <span class="metric-value" id="surplusComparison">+$1,250</span>
+                        </div>
+                        <div class="comparison-metric">
+                            <span class="metric-name">Annual Savings Rate Difference</span>
+                            <span class="metric-value" id="savingsRateComparison">+5.2%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Retirement Calculator -->
+                <div class="card retirement-card">
+                    <h2>Retirement Calculator</h2>
+                    <div class="retirement-inputs">
+                        <div class="retirement-input">
+                            <label for="currentAge">Current Age</label>
+                            <input type="number" id="currentAge" value="30" min="18" max="70">
+                        </div>
+                        <div class="retirement-input">
+                            <label for="retirementAge">Retirement Age</label>
+                            <input type="number" id="retirementAge" value="65" min="50" max="80">
+                        </div>
+                        <div class="retirement-input">
+                            <label for="currentRetirementSavings">Current Retirement Savings</label>
+                            <input type="number" id="currentRetirementSavings" value="300000" min="0" step="10000">
+                        </div>
+                        <div class="retirement-input">
+                            <label for="monthlyRetirementContribution">Monthly Contribution</label>
+                            <input type="number" id="monthlyRetirementContribution" value="2500" min="0" step="100">
+                        </div>
+                        <div class="retirement-input">
+                            <label for="expectedReturn">Expected Annual Return (%)</label>
+                            <input type="number" id="expectedReturn" value="7" min="3" max="12" step="0.5">
+                        </div>
+                    </div>
+                    
+                    <div class="retirement-results">
+                        <div class="retirement-projection">
+                            <span class="label">Projected Retirement Balance</span>
+                            <span class="value large" id="retirementProjection">$4,250,000</span>
+                        </div>
+                        <div class="retirement-monthly">
+                            <span class="label">Estimated Monthly Income (4% rule)</span>
+                            <span class="value" id="retirementMonthlyIncome">$14,167</span>
+                        </div>
+                        <div class="retirement-status">
+                            <span class="label">Retirement Readiness</span>
+                            <span class="value success" id="retirementStatus">On Track</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scenarios Tab -->
+        <section id="scenarios" class="tab-content">
+            <div class="scenarios-grid">
+                <div class="card">
+                    <h2>Scenario Management</h2>
+                    <div class="scenario-controls">
+                        <button class="btn-primary" id="createScenarioBtn">Create New Scenario</button>
+                        <button class="btn-secondary" id="importScenarioBtn">Import Scenario</button>
+                        <button class="btn-secondary" id="exportScenarioBtn">Export Current</button>
+                        <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                    </div>
+                    <div class="scenario-list" id="scenarioList">
+                        <!-- Scenarios will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Create Scenario Modal -->
+        <div id="createScenarioModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Create New Scenario</h3>
+                    <button class="close" id="closeCreateModal">&times;</button>
+                </div>
+                <form id="createScenarioForm">
+                    <div class="form-group">
+                        <label for="newScenarioName">Scenario Name</label>
+                        <input type="text" id="newScenarioName" required maxlength="50" placeholder="e.g., Promotion Scenario">
+                    </div>
+                    <div class="form-group">
+                        <label for="newScenarioDescription">Description</label>
+                        <textarea id="newScenarioDescription" rows="3" maxlength="200" placeholder="Brief description of this scenario"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="baseScenario">Base on existing scenario</label>
+                        <select id="baseScenario">
+                            <option value="baseline">Baseline 2025</option>
+                            <option value="optimistic">Optimistic</option>
+                            <option value="conservative">Conservative</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" id="cancelCreateBtn">Cancel</button>
+                        <button type="submit" class="btn-primary">Create Scenario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Settings</h3>
+                    <button class="close" id="closeSettingsModal">&times;</button>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-section">
+                        <h4>Household Information</h4>
+                        <div class="form-group">
+                            <label for="settingsState">State</label>
+                            <select id="settingsState">
+                                <option value="CA">California</option>
+                                <option value="NY">New York</option>
+                                <option value="TX">Texas</option>
+                                <option value="FL">Florida</option>
+                                <option value="WA">Washington</option>
+                                <!-- Add more states as needed -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="settingsFilingStatus">Filing Status</label>
+                            <select id="settingsFilingStatus">
+                                <option value="single">Single</option>
+                                <option value="marriedFilingJointly">Married Filing Jointly</option>
+                                <option value="marriedFilingSeparately">Married Filing Separately</option>
+                                <option value="headOfHousehold">Head of Household</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h4>Preferences</h4>
+                        <div class="form-group">
+                            <label for="settingsTheme">Theme</label>
+                            <select id="settingsTheme">
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="settingsDefaultView">Default View</label>
+                            <select id="settingsDefaultView">
+                                <option value="combined">Combined</option>
+                                <option value="person1">Partner 1</option>
+                                <option value="person2">Partner 2</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="settingsAutoSave">
+                                Auto-save changes
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelSettingsBtn">Cancel</button>
+                    <button type="button" class="btn-primary" id="saveSettingsBtn">Save Settings</button>
+                </div>
+            </div>
+        </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/utils/storage.js"></script>
+    <script src="js/utils/tax-calculator.js"></script>
+    <script src="js/core/calculator.js"></script>
+    <script src="js/core/scenario-manager.js"></script>
+    <script src="js/components/visualization.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
