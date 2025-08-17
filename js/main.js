@@ -39,6 +39,9 @@ class ConsciousSpendingApp {
             
             // Initialize scenarios and set default
             this.initializeScenarios();
+
+            // Populate scenario list
+            this.populateScenarioList();
             
             // Initialize visualization
             this.visualization.initializeCharts();
@@ -85,6 +88,9 @@ class ConsciousSpendingApp {
         if (settingsBtn) {
             settingsBtn.addEventListener('click', () => this.showSettings());
         }
+
+        // Scenario management buttons
+        this.setupScenarioManagementListeners();
         
         // Window resize handler
         window.addEventListener('resize', () => this.handleResize());
@@ -100,17 +106,81 @@ class ConsciousSpendingApp {
      */
     setupIncomeFormListeners() {
         const incomeInputs = [
-            'person1Salary', 'person1Bonus', 'person1Other',
-            'person1_401k', 'person1Health', 'person1HSA'
+            // Person 1 inputs
+            'person1Salary', 'person1Bonus', 'person1Other', 'person1PayFreq',
+            'person1_401k', 'person1Health', 'person1HSA', 'person1Other401k',
+            // Person 2 inputs
+            'person2Salary', 'person2Bonus', 'person2Other', 'person2PayFreq',
+            'person2_401k', 'person2Health', 'person2HSA', 'person2Other401k'
         ];
         
         incomeInputs.forEach(inputId => {
             const input = document.getElementById(inputId);
             if (input) {
                 input.addEventListener('input', () => this.handleIncomeChange());
+                input.addEventListener('change', () => this.handleIncomeChange());
                 input.addEventListener('blur', () => this.saveCurrentScenario());
             }
         });
+
+        // Set up expense form listeners
+        this.setupExpenseFormListeners();
+    }
+
+    /**
+     * Set up expense form listeners
+     */
+    setupExpenseFormListeners() {
+        const expenseInputs = [
+            // Fixed Costs
+            'rent', 'utilities', 'insurance',
+            'carPayment1', 'carPayment2', 'carInsurance', 'gasAndMaintenance',
+            'groceries', 'cellPhone', 'internet',
+            'studentLoan1', 'studentLoan2',
+            // Investments
+            'additionalRetirement', 'brokerage', 'rothIRA',
+            // Savings
+            'emergency', 'vacation', 'houseDownPayment', 'carReplacement',
+            // Guilt-Free
+            'dining', 'entertainment', 'hobbies', 'personalShopping',
+            'subscriptions', 'gifts', 'miscellaneous'
+        ];
+
+        const assignmentSelects = [
+            // Fixed Costs
+            'rentAssigned', 'utilitiesAssigned', 'insuranceAssigned',
+            'carPayment1Assigned', 'carPayment2Assigned', 'carInsuranceAssigned', 'gasAndMaintenanceAssigned',
+            'groceriesAssigned', 'cellPhoneAssigned', 'internetAssigned',
+            'studentLoan1Assigned', 'studentLoan2Assigned',
+            // Investments
+            'additionalRetirementAssigned', 'brokerageAssigned', 'rothIRAAssigned',
+            // Savings
+            'emergencyAssigned', 'vacationAssigned', 'houseDownPaymentAssigned', 'carReplacementAssigned',
+            // Guilt-Free
+            'diningAssigned', 'entertainmentAssigned', 'hobbiesAssigned', 'personalShoppingAssigned',
+            'subscriptionsAssigned', 'giftsAssigned', 'miscellaneousAssigned'
+        ];
+        
+        [...expenseInputs, ...assignmentSelects].forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('input', () => this.handleExpenseChange());
+                input.addEventListener('change', () => this.handleExpenseChange());
+                input.addEventListener('blur', () => this.saveCurrentScenario());
+            }
+        });
+
+        // Expense action buttons
+        const resetBtn = document.getElementById('resetExpensesBtn');
+        const optimizeBtn = document.getElementById('optimizeExpensesBtn');
+        
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetExpensesToDefaults());
+        }
+        
+        if (optimizeBtn) {
+            optimizeBtn.addEventListener('click', () => this.optimizeExpensesForRamit());
+        }
     }
 
     /**
@@ -250,12 +320,25 @@ class ConsciousSpendingApp {
         this.setInputValue('person1Salary', person1.salary);
         this.setInputValue('person1Bonus', person1.bonus);
         this.setInputValue('person1Other', person1.otherIncome);
+        this.setInputValue('person1PayFreq', person1.payFrequency);
         this.setInputValue('person1_401k', person1.preTexDeductions?.retirement401k);
         this.setInputValue('person1Health', person1.preTexDeductions?.healthInsurance);
         this.setInputValue('person1HSA', person1.preTexDeductions?.hsa);
+        this.setInputValue('person1Other401k', person1.preTexDeductions?.other || 0);
         
-        // Load person 2 income data (similar pattern)
-        // This would be expanded based on your form structure
+        // Load person 2 income data
+        const person2 = scenario.income.person2;
+        this.setInputValue('person2Salary', person2.salary);
+        this.setInputValue('person2Bonus', person2.bonus);
+        this.setInputValue('person2Other', person2.otherIncome);
+        this.setInputValue('person2PayFreq', person2.payFrequency);
+        this.setInputValue('person2_401k', person2.preTexDeductions?.retirement401k);
+        this.setInputValue('person2Health', person2.preTexDeductions?.healthInsurance);
+        this.setInputValue('person2HSA', person2.preTexDeductions?.hsa);
+        this.setInputValue('person2Other401k', person2.preTexDeductions?.other || 0);
+
+        // Load expense data
+        this.loadExpenseData(scenario.expenses);
     }
 
     /**
@@ -294,6 +377,7 @@ class ConsciousSpendingApp {
             currentScenario.income.person1.salary = this.getInputValue('person1Salary', 0);
             currentScenario.income.person1.bonus = this.getInputValue('person1Bonus', 0);
             currentScenario.income.person1.otherIncome = this.getInputValue('person1Other', 0);
+            currentScenario.income.person1.payFrequency = this.getInputValue('person1PayFreq', 'biweekly');
             
             if (!currentScenario.income.person1.preTexDeductions) {
                 currentScenario.income.person1.preTexDeductions = {};
@@ -301,7 +385,27 @@ class ConsciousSpendingApp {
             currentScenario.income.person1.preTexDeductions.retirement401k = this.getInputValue('person1_401k', 0);
             currentScenario.income.person1.preTexDeductions.healthInsurance = this.getInputValue('person1Health', 0);
             currentScenario.income.person1.preTexDeductions.hsa = this.getInputValue('person1HSA', 0);
+            currentScenario.income.person1.preTexDeductions.other = this.getInputValue('person1Other401k', 0);
         }
+        
+        // Update person 2 data
+        if (currentScenario.income.person2) {
+            currentScenario.income.person2.salary = this.getInputValue('person2Salary', 0);
+            currentScenario.income.person2.bonus = this.getInputValue('person2Bonus', 0);
+            currentScenario.income.person2.otherIncome = this.getInputValue('person2Other', 0);
+            currentScenario.income.person2.payFrequency = this.getInputValue('person2PayFreq', 'monthly');
+            
+            if (!currentScenario.income.person2.preTexDeductions) {
+                currentScenario.income.person2.preTexDeductions = {};
+            }
+            currentScenario.income.person2.preTexDeductions.retirement401k = this.getInputValue('person2_401k', 0);
+            currentScenario.income.person2.preTexDeductions.healthInsurance = this.getInputValue('person2Health', 0);
+            currentScenario.income.person2.preTexDeductions.hsa = this.getInputValue('person2HSA', 0);
+            currentScenario.income.person2.preTexDeductions.other = this.getInputValue('person2Other401k', 0);
+        }
+        
+        // Update expense data
+        this.updateExpenseDataFromForm(currentScenario);
         
         // Save the updated scenario
         this.scenarioManager.saveScenario(this.scenarioManager.currentScenario, currentScenario);
@@ -387,11 +491,290 @@ class ConsciousSpendingApp {
     }
 
     /**
+     * Setup scenario management listeners
+     */
+    setupScenarioManagementListeners() {
+        // Export scenario button
+        const exportBtn = document.getElementById('exportScenarioBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportCurrentScenario());
+        }
+
+        // Import scenario button
+        const importBtn = document.getElementById('importScenarioBtn');
+        const importInput = document.getElementById('importFileInput');
+        if (importBtn && importInput) {
+            importBtn.addEventListener('click', () => importInput.click());
+            importInput.addEventListener('change', (e) => this.handleScenarioImport(e));
+        }
+
+        // Create scenario button
+        const createBtn = document.getElementById('createScenarioBtn');
+        if (createBtn) {
+            createBtn.addEventListener('click', () => this.showCreateScenarioModal());
+        }
+
+        // Modal event listeners
+        this.setupModalListeners();
+    }
+
+    /**
+     * Setup modal event listeners
+     */
+    setupModalListeners() {
+        // Create scenario modal
+        const createModal = document.getElementById('createScenarioModal');
+        const closeCreateBtn = document.getElementById('closeCreateModal');
+        const cancelCreateBtn = document.getElementById('cancelCreateBtn');
+        const createForm = document.getElementById('createScenarioForm');
+
+        if (closeCreateBtn) closeCreateBtn.addEventListener('click', () => this.hideModal('createScenarioModal'));
+        if (cancelCreateBtn) cancelCreateBtn.addEventListener('click', () => this.hideModal('createScenarioModal'));
+        if (createForm) createForm.addEventListener('submit', (e) => this.handleCreateScenario(e));
+
+        // Settings modal
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettingsBtn = document.getElementById('closeSettingsModal');
+        const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+        if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => this.hideModal('settingsModal'));
+        if (cancelSettingsBtn) cancelSettingsBtn.addEventListener('click', () => this.hideModal('settingsModal'));
+        if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', () => this.handleSaveSettings());
+
+        // Close modals when clicking outside
+        [createModal, settingsModal].forEach(modal => {
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        this.hideModal(modal.id);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Export current scenario
+     */
+    exportCurrentScenario() {
+        try {
+            const scenarioName = this.scenarioManager.currentScenario;
+            this.scenarioManager.exportScenario(scenarioName);
+            this.showSuccess(`Scenario "${scenarioName}" exported successfully`);
+        } catch (error) {
+            this.showError('Failed to export scenario: ' + error.message);
+        }
+    }
+
+    /**
+     * Handle scenario import
+     */
+    async handleScenarioImport(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const scenarios = await this.storage.importScenarios(file);
+            this.scenarioManager.loadAllScenarios();
+            this.populateScenarioSelector();
+            this.populateScenarioList();
+            this.showSuccess(`Imported ${scenarios.length} scenario(s) successfully`);
+        } catch (error) {
+            this.showError('Failed to import scenario: ' + error.message);
+        }
+
+        // Reset file input
+        event.target.value = '';
+    }
+
+    /**
+     * Show create scenario modal
+     */
+    showCreateScenarioModal() {
+        // Populate base scenario options
+        const baseSelect = document.getElementById('baseScenario');
+        if (baseSelect) {
+            baseSelect.innerHTML = '';
+            this.scenarioManager.getScenarioNames().forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = this.scenarioManager.getScenarioMetadata(name)?.name || name;
+                baseSelect.appendChild(option);
+            });
+        }
+
+        this.showModal('createScenarioModal');
+    }
+
+    /**
+     * Handle create scenario form submission
+     */
+    handleCreateScenario(event) {
+        event.preventDefault();
+        
+        const name = document.getElementById('newScenarioName').value.trim();
+        const description = document.getElementById('newScenarioDescription').value.trim();
+        const baseScenario = document.getElementById('baseScenario').value;
+
+        if (!name) {
+            this.showError('Please enter a scenario name');
+            return;
+        }
+
+        try {
+            const success = this.scenarioManager.createNewScenario(name, description, baseScenario);
+            if (success) {
+                this.hideModal('createScenarioModal');
+                this.populateScenarioSelector();
+                this.populateScenarioList();
+                this.scenarioManager.setCurrentScenario(name);
+                this.showSuccess(`Created scenario "${name}" successfully`);
+                
+                // Clear form
+                document.getElementById('createScenarioForm').reset();
+            }
+        } catch (error) {
+            this.showError('Failed to create scenario: ' + error.message);
+        }
+    }
+
+    /**
+     * Populate scenario list in scenarios tab
+     */
+    populateScenarioList() {
+        const scenarioList = document.getElementById('scenarioList');
+        if (!scenarioList) return;
+
+        scenarioList.innerHTML = '';
+
+        this.scenarioManager.getScenarioNames().forEach(scenarioName => {
+            const metadata = this.scenarioManager.getScenarioMetadata(scenarioName);
+            const scenarioItem = document.createElement('div');
+            scenarioItem.className = 'scenario-item';
+            
+            scenarioItem.innerHTML = `
+                <h4>${metadata.name}</h4>
+                <p>${metadata.description}</p>
+                <div class="scenario-actions">
+                    <button class="btn-small" onclick="app.editScenario('${scenarioName}')">Edit</button>
+                    <button class="btn-small" onclick="app.duplicateScenario('${scenarioName}')">Duplicate</button>
+                    ${scenarioName !== 'baseline' ? `<button class="btn-small" onclick="app.deleteScenario('${scenarioName}')">Delete</button>` : ''}
+                </div>
+            `;
+            
+            scenarioList.appendChild(scenarioItem);
+        });
+    }
+
+    /**
+     * Edit scenario (switch to it)
+     */
+    editScenario(scenarioName) {
+        this.scenarioManager.setCurrentScenario(scenarioName);
+        this.setTab('income'); // Switch to income tab for editing
+        this.showSuccess(`Now editing scenario: ${scenarioName}`);
+    }
+
+    /**
+     * Duplicate scenario
+     */
+    duplicateScenario(scenarioName) {
+        const newName = prompt(`Enter name for duplicate of "${scenarioName}":`);
+        if (!newName || newName.trim() === '') return;
+
+        try {
+            this.scenarioManager.duplicateScenario(scenarioName, newName.trim());
+            this.populateScenarioSelector();
+            this.populateScenarioList();
+            this.showSuccess(`Duplicated scenario as "${newName}"`);
+        } catch (error) {
+            this.showError('Failed to duplicate scenario: ' + error.message);
+        }
+    }
+
+    /**
+     * Delete scenario
+     */
+    deleteScenario(scenarioName) {
+        if (confirm(`Are you sure you want to delete scenario "${scenarioName}"? This cannot be undone.`)) {
+            try {
+                this.scenarioManager.deleteScenario(scenarioName);
+                this.populateScenarioSelector();
+                this.populateScenarioList();
+                this.showSuccess(`Deleted scenario "${scenarioName}"`);
+            } catch (error) {
+                this.showError('Failed to delete scenario: ' + error.message);
+            }
+        }
+    }
+
+    /**
+     * Show modal
+     */
+    showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'block';
+            modal.classList.add('fade-in');
+        }
+    }
+
+    /**
+     * Hide modal
+     */
+    hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('fade-in');
+        }
+    }
+
+    /**
      * Show settings modal
      */
     showSettings() {
-        // Placeholder for settings modal
-        alert('Settings modal not implemented yet');
+        // Load current settings
+        const settings = this.storage.loadSettings();
+        
+        this.setInputValue('settingsState', settings.defaultState || 'CA');
+        this.setInputValue('settingsFilingStatus', settings.defaultFilingStatus || 'marriedFilingJointly');
+        this.setInputValue('settingsTheme', settings.theme || 'light');
+        this.setInputValue('settingsDefaultView', settings.defaultView || 'combined');
+        
+        const autoSaveCheckbox = document.getElementById('settingsAutoSave');
+        if (autoSaveCheckbox) {
+            autoSaveCheckbox.checked = settings.autoSave !== false;
+        }
+
+        this.showModal('settingsModal');
+    }
+
+    /**
+     * Handle save settings
+     */
+    handleSaveSettings() {
+        const settings = {
+            defaultState: this.getInputValue('settingsState', 'CA'),
+            defaultFilingStatus: this.getInputValue('settingsFilingStatus', 'marriedFilingJointly'),
+            theme: this.getInputValue('settingsTheme', 'light'),
+            defaultView: this.getInputValue('settingsDefaultView', 'combined'),
+            autoSave: document.getElementById('settingsAutoSave')?.checked !== false,
+            showTooltips: true,
+            currency: 'USD'
+        };
+
+        this.storage.saveSettings(settings);
+        this.hideModal('settingsModal');
+        this.showSuccess('Settings saved successfully');
+
+        // Apply theme if changed
+        if (settings.theme === 'dark') {
+            document.body.classList.add('dark-theme');
+        } else {
+            document.body.classList.remove('dark-theme');
+        }
     }
 
     /**
@@ -422,6 +805,264 @@ class ConsciousSpendingApp {
         } catch (error) {
             this.showError('Failed to export scenario');
         }
+    }
+
+    /**
+     * Load expense data into forms
+     */
+    loadExpenseData(expenses) {
+        if (!expenses || !expenses.ramitCategories) return;
+
+        const categories = expenses.ramitCategories;
+        
+        // Helper function to load category items
+        const loadCategory = (category, mapping) => {
+            if (!category) return;
+            
+            Object.keys(category).forEach(subcategoryKey => {
+                const subcategory = category[subcategoryKey];
+                if (subcategory && typeof subcategory === 'object') {
+                    Object.keys(subcategory).forEach(itemKey => {
+                        const item = subcategory[itemKey];
+                        if (item && item.amount !== undefined) {
+                            const mappedKey = mapping[itemKey] || itemKey;
+                            this.setInputValue(mappedKey, item.amount);
+                            this.setInputValue(mappedKey + 'Assigned', item.assignedTo || 'shared');
+                        }
+                    });
+                }
+            });
+        };
+
+        // Load each category with field mappings
+        const fixedCostsMapping = {
+            rent: 'rent',
+            utilities: 'utilities',
+            rentersInsurance: 'insurance',
+            carPayment1: 'carPayment1',
+            carPayment2: 'carPayment2',
+            carInsurance: 'carInsurance',
+            gasAndMaintenance: 'gasAndMaintenance',
+            groceries: 'groceries',
+            cellPhone: 'cellPhone',
+            internet: 'internet',
+            studentLoan1: 'studentLoan1',
+            studentLoan2: 'studentLoan2'
+        };
+
+        loadCategory(categories.fixedCosts, fixedCostsMapping);
+        
+        // Load investments
+        if (categories.investments) {
+            this.setInputValue('additionalRetirement', categories.investments.retirement?.amount || 0);
+            this.setInputValue('additionalRetirementAssigned', categories.investments.retirement?.assignedTo || 'shared');
+            this.setInputValue('brokerage', categories.investments.brokerage?.amount || 0);
+            this.setInputValue('brokerageAssigned', categories.investments.brokerage?.assignedTo || 'shared');
+            this.setInputValue('rothIRA', categories.investments.rothIRA?.amount || 0);
+            this.setInputValue('rothIRAAssigned', categories.investments.rothIRA?.assignedTo || 'shared');
+        }
+
+        // Load savings
+        if (categories.savings) {
+            this.setInputValue('emergency', categories.savings.emergency?.amount || 0);
+            this.setInputValue('emergencyAssigned', categories.savings.emergency?.assignedTo || 'shared');
+            this.setInputValue('vacation', categories.savings.vacation?.amount || 0);
+            this.setInputValue('vacationAssigned', categories.savings.vacation?.assignedTo || 'shared');
+            this.setInputValue('houseDownPayment', categories.savings.houseDownPayment?.amount || 0);
+            this.setInputValue('houseDownPaymentAssigned', categories.savings.houseDownPayment?.assignedTo || 'shared');
+            this.setInputValue('carReplacement', categories.savings.carReplacement?.amount || 0);
+            this.setInputValue('carReplacementAssigned', categories.savings.carReplacement?.assignedTo || 'shared');
+        }
+
+        // Load guilt-free spending
+        if (categories.guiltFreeSpending) {
+            this.setInputValue('dining', categories.guiltFreeSpending.dining?.amount || 0);
+            this.setInputValue('diningAssigned', categories.guiltFreeSpending.dining?.assignedTo || 'shared');
+            this.setInputValue('entertainment', categories.guiltFreeSpending.entertainment?.amount || 0);
+            this.setInputValue('entertainmentAssigned', categories.guiltFreeSpending.entertainment?.assignedTo || 'shared');
+            this.setInputValue('hobbies', categories.guiltFreeSpending.hobbies?.amount || 0);
+            this.setInputValue('hobbiesAssigned', categories.guiltFreeSpending.hobbies?.assignedTo || 'person1');
+            this.setInputValue('personalShopping', categories.guiltFreeSpending.personalShopping?.amount || 0);
+            this.setInputValue('personalShoppingAssigned', categories.guiltFreeSpending.personalShopping?.assignedTo || 'person2');
+            this.setInputValue('subscriptions', categories.guiltFreeSpending.subscriptions?.amount || 0);
+            this.setInputValue('subscriptionsAssigned', categories.guiltFreeSpending.subscriptions?.assignedTo || 'shared');
+            this.setInputValue('gifts', categories.guiltFreeSpending.gifts?.amount || 0);
+            this.setInputValue('giftsAssigned', categories.guiltFreeSpending.gifts?.assignedTo || 'shared');
+            this.setInputValue('miscellaneous', categories.guiltFreeSpending.miscellaneous?.amount || 0);
+            this.setInputValue('miscellaneousAssigned', categories.guiltFreeSpending.miscellaneous?.assignedTo || 'shared');
+        }
+    }
+
+    /**
+     * Handle expense form changes
+     */
+    handleExpenseChange() {
+        if (!this.isInitialized) return;
+        
+        // Debounce the calculation update
+        clearTimeout(this.expenseChangeTimeout);
+        this.expenseChangeTimeout = setTimeout(() => {
+            this.updateScenarioFromForm();
+            this.updateCalculations();
+            this.updateExpenseSummaries();
+        }, 300);
+    }
+
+    /**
+     * Update expense data from form
+     */
+    updateExpenseDataFromForm(scenario) {
+        if (!scenario.expenses) scenario.expenses = { ramitCategories: {} };
+        
+        const categories = scenario.expenses.ramitCategories;
+        
+        // Helper function to update category
+        const updateExpenseItem = (categoryPath, itemKey, inputId, assignedId) => {
+            const pathParts = categoryPath.split('.');
+            let category = categories;
+            
+            // Navigate to the correct category
+            pathParts.forEach(part => {
+                if (!category[part]) category[part] = {};
+                category = category[part];
+            });
+            
+            if (!category[itemKey]) category[itemKey] = {};
+            category[itemKey].amount = this.getInputValue(inputId, 0);
+            category[itemKey].assignedTo = this.getInputValue(assignedId, 'shared');
+        };
+
+        // Update fixed costs
+        updateExpenseItem('fixedCosts.housing', 'rent', 'rent', 'rentAssigned');
+        updateExpenseItem('fixedCosts.housing', 'utilities', 'utilities', 'utilitiesAssigned');
+        updateExpenseItem('fixedCosts.housing', 'rentersInsurance', 'insurance', 'insuranceAssigned');
+        
+        updateExpenseItem('fixedCosts.transportation', 'carPayment1', 'carPayment1', 'carPayment1Assigned');
+        updateExpenseItem('fixedCosts.transportation', 'carPayment2', 'carPayment2', 'carPayment2Assigned');
+        updateExpenseItem('fixedCosts.transportation', 'carInsurance', 'carInsurance', 'carInsuranceAssigned');
+        updateExpenseItem('fixedCosts.transportation', 'gasAndMaintenance', 'gasAndMaintenance', 'gasAndMaintenanceAssigned');
+        
+        updateExpenseItem('fixedCosts.essentials', 'groceries', 'groceries', 'groceriesAssigned');
+        updateExpenseItem('fixedCosts.essentials', 'cellPhone', 'cellPhone', 'cellPhoneAssigned');
+        updateExpenseItem('fixedCosts.essentials', 'internet', 'internet', 'internetAssigned');
+        
+        updateExpenseItem('fixedCosts.debt', 'studentLoan1', 'studentLoan1', 'studentLoan1Assigned');
+        updateExpenseItem('fixedCosts.debt', 'studentLoan2', 'studentLoan2', 'studentLoan2Assigned');
+
+        // Update investments
+        updateExpenseItem('investments', 'retirement', 'additionalRetirement', 'additionalRetirementAssigned');
+        updateExpenseItem('investments', 'brokerage', 'brokerage', 'brokerageAssigned');
+        updateExpenseItem('investments', 'rothIRA', 'rothIRA', 'rothIRAAssigned');
+
+        // Update savings
+        updateExpenseItem('savings', 'emergency', 'emergency', 'emergencyAssigned');
+        updateExpenseItem('savings', 'vacation', 'vacation', 'vacationAssigned');
+        updateExpenseItem('savings', 'houseDownPayment', 'houseDownPayment', 'houseDownPaymentAssigned');
+        updateExpenseItem('savings', 'carReplacement', 'carReplacement', 'carReplacementAssigned');
+
+        // Update guilt-free spending
+        updateExpenseItem('guiltFreeSpending', 'dining', 'dining', 'diningAssigned');
+        updateExpenseItem('guiltFreeSpending', 'entertainment', 'entertainment', 'entertainmentAssigned');
+        updateExpenseItem('guiltFreeSpending', 'hobbies', 'hobbies', 'hobbiesAssigned');
+        updateExpenseItem('guiltFreeSpending', 'personalShopping', 'personalShopping', 'personalShoppingAssigned');
+        updateExpenseItem('guiltFreeSpending', 'subscriptions', 'subscriptions', 'subscriptionsAssigned');
+        updateExpenseItem('guiltFreeSpending', 'gifts', 'gifts', 'giftsAssigned');
+        updateExpenseItem('guiltFreeSpending', 'miscellaneous', 'miscellaneous', 'miscellaneousAssigned');
+    }
+
+    /**
+     * Update expense summaries in real-time
+     */
+    updateExpenseSummaries() {
+        const calculations = this.calculator.calculations;
+        if (!calculations) return;
+
+        const ramitBreakdown = calculations.ramitBreakdown;
+        if (!ramitBreakdown) return;
+
+        // Update category totals and percentages
+        this.updateElement('fixedCostsTotal', this.formatCurrency(ramitBreakdown.fixedCosts.amount));
+        this.updateElement('fixedCostsPercentage', ramitBreakdown.fixedCosts.percentage.toFixed(1) + '%');
+        
+        this.updateElement('investmentsTotal', this.formatCurrency(ramitBreakdown.investments.amount));
+        this.updateElement('investmentsPercentage', ramitBreakdown.investments.percentage.toFixed(1) + '%');
+        
+        this.updateElement('savingsTotal', this.formatCurrency(ramitBreakdown.savings.amount));
+        this.updateElement('savingsPercentage', ramitBreakdown.savings.percentage.toFixed(1) + '%');
+        
+        this.updateElement('guiltFreeTotal', this.formatCurrency(ramitBreakdown.guiltFreeSpending.amount));
+        this.updateElement('guiltFreePercentage', ramitBreakdown.guiltFreeSpending.percentage.toFixed(1) + '%');
+
+        // Update summary totals
+        const totalExpenses = calculations.expenses.total;
+        this.updateElement('totalMonthlyExpenses', this.formatCurrency(totalExpenses));
+        this.updateElement('fixedCostsSummary', this.formatCurrency(ramitBreakdown.fixedCosts.amount));
+        this.updateElement('investmentsSummary', this.formatCurrency(ramitBreakdown.investments.amount));
+        this.updateElement('savingsSummary', this.formatCurrency(ramitBreakdown.savings.amount));
+        this.updateElement('guiltFreeSummary', this.formatCurrency(ramitBreakdown.guiltFreeSpending.amount));
+    }
+
+    /**
+     * Reset expenses to defaults
+     */
+    resetExpensesToDefaults() {
+        if (confirm('Reset all expenses to default values? This will overwrite your current expense settings.')) {
+            const baselineScenario = this.scenarioManager.scenarios.baseline;
+            if (baselineScenario) {
+                this.loadExpenseData(baselineScenario.expenses);
+                this.handleExpenseChange();
+            }
+        }
+    }
+
+    /**
+     * Optimize expenses for Ramit's plan
+     */
+    optimizeExpensesForRamit() {
+        const calculations = this.calculator.calculations;
+        if (!calculations) return;
+
+        const monthlyNet = calculations.household.monthlyNetIncome;
+        const targetFixed = monthlyNet * 0.55; // 55% target for fixed costs
+        const targetInvestments = monthlyNet * 0.10; // 10% for investments
+        const targetSavings = monthlyNet * 0.075; // 7.5% for savings
+        const targetGuiltFree = monthlyNet * 0.275; // 27.5% for guilt-free
+
+        if (confirm(`Optimize expenses for Ramit's Conscious Spending Plan?
+        
+Target allocations based on your ${this.formatCurrency(monthlyNet)} monthly net income:
+• Fixed Costs: ${this.formatCurrency(targetFixed)} (55%)
+• Investments: ${this.formatCurrency(targetInvestments)} (10%)
+• Savings: ${this.formatCurrency(targetSavings)} (7.5%)
+• Guilt-Free: ${this.formatCurrency(targetGuiltFree)} (27.5%)
+
+This will adjust your current expense amounts.`)) {
+            
+            // This is a simplified optimization - in a real app you'd want more sophisticated logic
+            this.showSuccess('Expense optimization feature coming soon! For now, manually adjust your expenses to match the target percentages.');
+        }
+    }
+
+    /**
+     * Update element safely
+     */
+    updateElement(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
+    /**
+     * Format currency utility
+     */
+    formatCurrency(amount, precision = 0) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: precision,
+            maximumFractionDigits: precision
+        }).format(amount);
     }
 
     /**
